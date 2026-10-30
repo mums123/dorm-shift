@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="سامانه مدیریت برنامه شیفت خوابگاه‌های دانشجویی — آبان ۱۴۰۵">
+<meta name="theme-color" content="#1e293b">
+<title>برنامه شیفت خوابگاه‌ها — آبان ۱۴۰۵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231e293b'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>🗓</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<style>
+  :root {
+    --bg-body: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-header: #0f172a;
+    --bg-header-grad: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --th-bg: #f8fafc;
+    --input-bg: #ffffff;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --ok: #10b981;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition: all 0.2s ease;
+  }
+  body.dark-mode {
+    --bg-body: #0f172a;
+    --bg-card: #1e293b;
+    --bg-header: #020617;
+    --bg-header-grad: linear-gradient(135deg, #1e293b 0%, #020617 100%);
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --th-bg: #0f172a;
+    --input-bg: #0f172a;
+    --primary-color: #60a5fa;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--bg-body); color: var(--text-main); padding: 10px; min-height: 100vh; line-height: 1.6; font-size: 13px; transition: background-color 0.3s ease, color 0.3s ease; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .app-header { background: var(--bg-header-grad); color: white; padding: 14px 18px; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; gap: 14px; box-shadow: var(--shadow-lg); text-align: center; position: relative; overflow: hidden; }
+  .app-header::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); pointer-events: none; }
+  .app-header h1 { font-size: 16px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; letter-spacing: -0.3px; }
+  .admin-badge { display: none; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #78350f; padding: 4px 10px; border-radius: 20px; box-shadow: 0 2px 8px rgba(245,158,11,0.4); }
+  body.is-admin .admin-badge { display: inline-flex; }
+  body.is-admin .admin-only { display: inline-flex !important; }
+  .controls { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; position: relative; z-index: 1; }
+  .control-box { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.15); flex: 1; min-width: 140px; backdrop-filter: blur(10px); transition: var(--transition); }
+  .control-box:hover { background: rgba(255,255,255,0.12); }
+  .control-box label { font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; }
+  .control-box select { flex: 1; padding: 6px 8px; font-size: 12px; border-radius: 6px; border: none; font-family: inherit; font-weight: 700; color: var(--text-main); background: var(--input-bg); cursor: pointer; outline: none; width: 100%; }
+  .tool-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: white; width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 17px; transition: var(--transition); backdrop-filter: blur(10px); }
+  .tool-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .tool-btn:active { transform: scale(0.95); }
+  .tool-btn.danger { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); }
+  .tool-btn.admin-only { display: none; }
+  .tool-btn.logged-in { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-color: #fbbf24; box-shadow: 0 2px 8px rgba(245,158,11,0.4); }
+  .alert-box, .warn-box { display: none; padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 14px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow-md); position: sticky; top: 12px; z-index: 100; animation: slideDown 0.3s ease-out; border-right-width: 5px; border-right-style: solid; }
+  .alert-box { background: #fef2f2; color: #991b1b; border-right-color: var(--danger); }
+  .warn-box { background: #fffbeb; color: #92400e; border-right-color: var(--warn); }
+  body.dark-mode .alert-box { background: #450a0a; color: #fecaca; }
+  body.dark-mode .warn-box { background: #451a03; color: #fde68a; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+  .guide-card { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-right: 5px solid var(--primary-color); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.9; color: #1e3a8a; display: flex; align-items: flex-start; gap: 12px; box-shadow: var(--shadow-sm); }
+  .guide-card .guide-card-icon { flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+  .guide-card .guide-card-content { flex: 1; }
+  .guide-card .guide-card-content b { color: #1e3a8a; font-weight: 900; }
+  .guide-card .guide-card-content ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .guide-card .guide-card-content ul li { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 1.7; }
+  .guide-card .guide-card-content ul li::before { content: "•"; color: var(--primary-color); font-weight: 900; font-size: 16px; line-height: 1.2; flex-shrink: 0; }
+  body.dark-mode .guide-card { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #dbeafe; border-color: #1e40af; border-right-color: #60a5fa; }
+  body.dark-mode .guide-card .guide-card-content b { color: #dbeafe; }
+  .search-box { margin-bottom: 14px; padding: 0; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; box-shadow: var(--shadow-sm); transition: var(--transition); overflow: hidden; }
+  .search-box:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
+  .search-box input { flex: 1; padding: 12px 16px; border: none; border-radius: 0; font-family: inherit; font-size: 13px; background: var(--bg-card); color: var(--text-main); outline: none; }
+  .table-container { background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow-x: auto; margin-bottom: 18px; -webkit-overflow-scrolling: touch; }
+  table.main-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; font-size: 12px; }
+  th, td { border-bottom: 1px solid var(--border-color); border-left: 1px solid var(--border-color); padding: 8px 4px; vertical-align: middle; }
+  th:last-child, td:last-child { border-left: none; }
+  th { font-weight: 900; font-size: 12px; color: var(--text-main); background: var(--th-bg); position: sticky; top: 0; z-index: 2; }
+  thead tr:nth-child(2) th { top: 36px; }
+  .day-cell { font-weight: 900; font-size: 12px; width: 70px; color: var(--text-main); white-space: nowrap; }
+  .date-cell { font-size: 11px; width: 70px; color: var(--text-muted); white-space: nowrap; }
+  tr.is-friday td { background: linear-gradient(90deg, #fef3c7 0%, #fffbeb 100%); }
+  body.dark-mode tr.is-friday td { background: linear-gradient(90deg, #422006 0%, #1e293b 100%); }
+  tr.is-friday .day-cell, tr.is-friday .date-cell { color: #dc2626; font-weight: 900; }
+  tbody tr { transition: background 0.15s ease; }
+  tbody tr:hover td:not(.day-cell):not(.date-cell) { background: var(--th-bg); }
+  .bg-z1 { background: #e0f2fe !important; color: #0369a1 !important; }
+  .bg-z2 { background: #dcfce7 !important; color: #15803d !important; }
+  .bg-z3 { background: #ffedd5 !important; color: #c2410c !important; }
+  .bg-z4 { background: #fef9c3 !important; color: #a16207 !important; }
+  .bg-z5 { background: #f3e8ff !important; color: #6b21a8 !important; }
+  body.dark-mode .bg-z1 { background: #0c4a6e !important; color: #bae6fd !important; }
+  body.dark-mode .bg-z2 { background: #14532d !important; color: #bbf7d0 !important; }
+  body.dark-mode .bg-z3 { background: #7c2d12 !important; color: #fed7aa !important; }
+  body.dark-mode .bg-z4 { background: #713f12 !important; color: #fef08a !important; }
+  body.dark-mode .bg-z5 { background: #581c87 !important; color: #e9d5ff !important; }
+  select.s-cell { width: 100%; height: 36px; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 11px; font-weight: 700; text-align: center; text-align-last: center; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; color: var(--text-main); border-radius: 6px; padding: 0 4px; transition: var(--transition); }
+  select.s-cell:hover:not(:disabled) { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+  select.s-cell:focus { border-color: var(--primary-color); background: var(--bg-card); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  select.s-cell.mine { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%) !important; color: #166534 !important; border-color: #22c55e; box-shadow: 0 2px 6px rgba(34,197,94,0.3); }
+  body.dark-mode select.s-cell.mine { background: linear-gradient(135deg, #14532d 0%, #166534 100%) !important; color: #bbf7d0 !important; }
+  select.s-cell.filled { border-color: #86efac; }
+  select.s-cell:disabled { opacity: 0.7; cursor: not-allowed; }
+  .section-box { background: var(--bg-card); border-radius: var(--radius-md); padding: 16px; margin-top: 18px; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
+  .section-box h3 { font-size: 14px; margin-bottom: 14px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-weight: 900; }
+  .leave-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius-sm); }
+  table.leave-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; font-size: 11px; min-width: 500px; }
+  table.leave-table th { background: var(--th-bg); padding: 10px 6px; border-bottom: 2px solid var(--border-color); font-size: 11px; font-weight: 900; }
+  table.leave-table td { padding: 6px; border-bottom: 1px solid var(--border-color); }
+  table.leave-table tr:last-child td { border-bottom: none; }
+  .leave-name-cell { font-weight: 900; text-align: right; padding-right: 12px !important; color: var(--primary-color); white-space: nowrap; font-size: 12px; }
+  .leave-select { width: 100%; height: 34px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 11px; text-align: center; outline: none; background: var(--bg-body); color: var(--text-main); -webkit-appearance: none; appearance: none; padding: 0 4px; transition: var(--transition); cursor: pointer; }
+  .leave-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .leave-select.locked { opacity: 0.6; cursor: not-allowed; }
+  .stats-table-wrapper { overflow-x: auto; border-radius: var(--radius-sm); -webkit-overflow-scrolling: touch; }
+  table.stats-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; font-size: 11px; min-width: 700px; }
+  table.stats-table th { background: var(--bg-header-grad); color: white; padding: 10px 4px; font-size: 10.5px; font-weight: 900; position: sticky; top: 0; }
+  table.stats-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+  table.stats-table th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+  table.stats-table td { padding: 8px 4px; border-bottom: 1px solid var(--border-color); }
+  table.stats-table tr:last-child td { border-bottom: none; }
+  table.stats-table tr:nth-child(even) { background: var(--th-bg); }
+  .stat-name { font-weight: 900; text-align: right; padding-right: 12px !important; color: var(--primary-color); white-space: nowrap; }
+  .val-plus { color: #059669; font-weight: 900; background: #d1fae5; border-radius: 4px; }
+  .val-minus { color: #dc2626; font-weight: 900; background: #fee2e2; border-radius: 4px; }
+  body.dark-mode .val-plus { background: #064e3b; color: #a7f3d0; }
+  body.dark-mode .val-minus { background: #7f1d1d; color: #fecaca; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
+  .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-content { background: var(--bg-card); color: var(--text-main); width: 100%; max-width: 600px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes slideUp { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+  .modal-header { background: var(--bg-header-grad); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-size: 15px; margin: 0; font-weight: 900; }
+  .modal-close { background: rgba(255,255,255,0.1); border: none; color: white; font-size: 22px; cursor: pointer; line-height: 1; opacity: 0.9; padding: 0; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+  .modal-close:hover { background: rgba(255,255,255,0.25); }
+  .modal-body { padding: 20px; overflow-y: auto; font-size: 13px; line-height: 1.8; }
+  .staff-list { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+  .staff-item { display: flex; justify-content: space-between; align-items: center; background: var(--th-bg); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); gap: 8px; flex-wrap: wrap; transition: var(--transition); }
+  .staff-item:hover { box-shadow: var(--shadow-sm); }
+  .staff-item .staff-info { flex: 1; min-width: 100px; font-size: 13px; font-weight: 700; }
+  .staff-item input.req-input { width: 70px; padding: 6px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 12px; background: var(--input-bg); color: var(--text-main); text-align: center; font-weight: 700; }
+  .btn-add-staff { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+  .btn-add-staff input { flex: 1; min-width: 100px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; background: var(--input-bg); color: var(--text-main); outline: none; transition: var(--transition); }
+  .btn-add-staff input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .btn-add-staff button { padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; transition: var(--transition); box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+  .btn-add-staff button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+  .btn-del { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; transition: var(--transition); }
+  .btn-del:hover { background: #fecaca; }
+  body.dark-mode .btn-del { background: #7f1d1d; color: #fecaca; border-color: #dc2626; }
+  .btn-secondary { background: var(--th-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; transition: var(--transition); }
+  .btn-secondary:hover { background: var(--border-color); }
+  .info-banner { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1e40af; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12px; border-right: 4px solid var(--primary-color); line-height: 1.7; font-weight: 600; }
+  body.dark-mode .info-banner { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #bfdbfe; border-right-color: #60a5fa; }
+  .dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(8px); }
+  .dialog-overlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+  .dialog-box { background: var(--bg-card); color: var(--text-main); border-radius: var(--radius-md); max-width: 420px; width: 100%; padding: 24px; box-shadow: var(--shadow-lg); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .dialog-box h3 { font-size: 16px; margin-bottom: 10px; font-weight: 900; }
+  .dialog-box p { font-size: 13px; margin-bottom: 16px; color: var(--text-muted); white-space: pre-line; line-height: 1.8; }
+  .dialog-box input { width: 100%; padding: 11px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; margin-bottom: 14px; background: var(--input-bg); color: var(--text-main); outline: none; transition: var(--transition); }
+  .dialog-box input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-start; }
+  .dialog-actions button { padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; transition: var(--transition); }
+  .dialog-actions button:hover { transform: translateY(-1px); }
+  .dialog-actions .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+  .dialog-actions .btn-cancel { background: var(--th-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+  .dialog-actions .btn-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; box-shadow: 0 2px 8px rgba(239,68,68,0.3); }
+  .col-hidden { display: none !important; }
+  .rules-list, .steps-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .rules-list li, .steps-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--bg-body); border: 1px solid var(--border-color); font-size: 13.5px; line-height: 1.8; color: var(--text-main); transition: var(--transition); }
+  .rules-list li { border-right: 4px solid var(--primary-color); }
+  .steps-list li { border-right: 4px solid #3b82f6; }
+  .rules-list li:hover, .steps-list li:hover { background: var(--th-bg); }
+  .rules-list .rule-icon, .steps-list .step-icon { flex-shrink: 0; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 900; margin-top: 1px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
+  .rules-list .rule-text, .steps-list .step-text { flex: 1; }
+  .rules-list .rule-text b, .steps-list .step-text b { color: var(--primary-color); font-weight: 900; }
+  .rules-list .rule-badge { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 3px 9px; border-radius: 20px; margin-right: 6px; vertical-align: middle; }
+  .rules-list .rule-badge.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .rules-list .rule-badge.warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .rules-list .rule-badge.ok { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+  body.dark-mode .rules-list li, body.dark-mode .steps-list li { background: #0f172a; }
+  body.dark-mode .rules-list li:hover, body.dark-mode .steps-list li:hover { background: #1e293b; }
+  body.dark-mode .rules-list .rule-badge.danger { background: #7f1d1d; color: #fecaca; border-color: #dc2626; }
+  body.dark-mode .rules-list .rule-badge.warn { background: #78350f; color: #fde68a; border-color: #f59e0b; }
+  body.dark-mode .rules-list .rule-badge.ok { background: #064e3b; color: #a7f3d0; border-color: #10b981; }
+  .tabs-nav { display: flex; gap: 6px; margin-bottom: 16px; background: var(--bg-card); padding: 6px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs-nav::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 1; min-width: 120px; padding: 11px 14px; border: none; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 13px; font-weight: 800; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+  .tab-btn:hover { background: var(--th-bg); color: var(--text-main); }
+  .tab-btn.active { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.35); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: tabFadeIn 0.25s ease-out; }
+  @keyframes tabFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  body.dark-mode .tabs-nav { background: #1e293b; }
+  body.dark-mode .tab-btn:hover { background: #334155; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  .rules-list li:focus-visible, .steps-list li:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 2px; }
+  @media (min-width: 768px) {
+    body { padding: 20px; font-size: 14px; }
+        .app-header { flex-direction: row; justify-content: space-between; text-align: right; padding: 18px 28px; }
+    .app-header h1 { font-size: 19px; }
+    .controls { justify-content: flex-end; width: auto; }
+    .control-box { min-width: auto; flex: none; }
+    .control-box label { font-size: 13px; }
+    .control-box select { font-size: 13px; }
+    .tool-btn { width: 42px; height: 42px; font-size: 19px; }
+    .section-box { padding: 22px; }
+    .section-box h3 { font-size: 16px; margin-bottom: 16px; padding-bottom: 10px; }
+    table.main-table { font-size: 13px; }
+    th, td { padding: 10px 6px; }
+    th { font-size: 13px; }
+    .day-cell { font-size: 14px; width: 80px; }
+    .date-cell { font-size: 12px; width: 80px; }
+    select.s-cell { height: 40px; font-size: 12px; }
+    table.leave-table { font-size: 12px; }
+    table.leave-table th { font-size: 12px; padding: 12px 8px; }
+    table.leave-table td { padding: 8px; }
+    .leave-name-cell { font-size: 13px; padding-right: 16px !important; }
+    .leave-select { height: 36px; font-size: 12px; }
+    table.stats-table { font-size: 12px; }
+    table.stats-table th { padding: 12px 5px; font-size: 11px; }
+    table.stats-table td { padding: 9px 5px; }
+    .stat-name { padding-right: 16px !important; font-size: 13px; }
+    .modal-content { max-width: 640px; }
+    .modal-header { padding: 18px 26px; }
+    .modal-header h2 { font-size: 17px; }
+    .modal-body { padding: 24px; font-size: 13.5px; }
+    .rules-list li, .steps-list li { font-size: 14px; padding: 14px 16px; }
+    .rules-list .rule-icon, .steps-list .step-icon { width: 30px; height: 30px; font-size: 14px; }
+    .tab-btn { font-size: 14px; padding: 12px 18px; }
+  }
+  @media (max-width: 480px) {
+    .tab-btn { font-size: 12px; min-width: 100px; padding: 10px 8px; }
+  }
+  @media (max-width: 380px) {
+    body { padding: 6px; font-size: 12px; }
+    .app-header { padding: 10px 12px; }
+    .app-header h1 { font-size: 13px; }
+    .tool-btn { width: 34px; height: 34px; font-size: 15px; }
+    .day-cell, .date-cell { width: 60px; font-size: 10.5px; }
+    select.s-cell { height: 32px; font-size: 10.5px; }
+    .guide-card { padding: 10px 12px; }
+    .guide-card .guide-card-content ul li { font-size: 11.5px; }
+  }
+  @media print {
+    .app-header, .tool-btn, .modal-overlay, .dialog-overlay, .guide-card, .search-box, .tabs-nav { display: none !important; }
+    .tab-panel { display: block !important; }
+    body { background: white; color: black; padding: 0; }
+    .section-box { box-shadow: none; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="app-header">
+    <h1>
+      📅 برنامه شیفت خوابگاه‌ها — آبان ۱۴۰۵
+      <span class="admin-badge">👑 ادمین</span>
+    </h1>
+    <div class="controls">
+      <div class="control-box">
+        <label>🏢 خوابگاه:</label>
+        <select id="myZone" onchange="onZoneChange()">
+          <option value="">همه</option>
+          <option value="بهارستان ۱">بهارستان ۱</option>
+          <option value="بهارستان ۲">بهارستان ۲</option>
+          <option value="بهارستان ۳">بهارستان ۳</option>
+          <option value="نجمه خاتون">نجمه خاتون</option>
+          <option value="گلشن">گلشن</option>
+        </select>
+      </div>
+      <div class="control-box">
+        <label>👤 نام من:</label>
+        <select id="myName" onchange="onNameChange()">
+          <option value="">انتخاب...</option>
+        </select>
+      </div>
+      <button class="tool-btn" onclick="openExcel()" title="خروجی اکسل">📊</button>
+      <button class="tool-btn admin-only" onclick="openStaff()" title="مدیریت پرسنل">👥</button>
+      <button class="tool-btn" onclick="toggleDarkMode()" title="حالت شب">🌙</button>
+      <button class="tool-btn" onclick="openHelp()" title="راهنما">❓</button>
+      <button class="tool-btn admin-only danger" id="resetBtn" onclick="forceReset()" title="پاک‌سازی کامل">🧹</button>
+      <button class="tool-btn" id="adminBtn" onclick="onAdminBtnClick()" title="ورود/خروج ادمین">🔑</button>
+    </div>
+  </div>
+
+  <div class="alert-box" id="alertBox"></div>
+  <div class="warn-box" id="warnBox"></div>
+
+  <div class="tabs-nav" role="tablist" aria-label="بخش‌های سامانه">
+    <button class="tab-btn active" id="tabBtnShifts" role="tab" aria-selected="true" aria-controls="panelShifts" onclick="switchTab('shifts')">📅 برنامه شیفت</button>
+    <button class="tab-btn" id="tabBtnLeaves" role="tab" aria-selected="false" aria-controls="panelLeaves" onclick="switchTab('leaves')">🏖️ جدول مرخصی</button>
+    <button class="tab-btn" id="tabBtnStats" role="tab" aria-selected="false" aria-controls="panelStats" onclick="switchTab('stats')">📊 جدول آمار</button>
+  </div>
+
+  <div class="tab-panel active" id="panelShifts" role="tabpanel" aria-labelledby="tabBtnShifts">
+    <div class="guide-card" role="note" aria-label="راهنمای ثبت شیفت">
+      <span class="guide-card-icon" aria-hidden="true">💡</span>
+      <div class="guide-card-content">
+        <b>راهنمای ثبت شیفت</b>
+        <ul>
+          <li>ابتدا نام خود را از نوار بالا انتخاب کنید.</li>
+          <li>در جدول زیر، روی خانه مورد نظر کلیک کرده و نام خود را انتخاب کنید.</li>
+          <li>فقط شیفت‌های خودتان قابل ویرایش است.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 جستجوی نام همکار..." oninput="filterPersonnel()">
+    </div>
+    <div class="table-container">
+      <table class="main-table" id="mainTable">
+        <thead>
+          <tr id="zoneHeaderRow">
+            <th rowspan="2" class="day-cell" style="background: var(--th-bg);">روز</th>
+            <th rowspan="2" class="date-cell" style="background: var(--th-bg);">تاریخ</th>
+          </tr>
+          <tr id="subHeader"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panelLeaves" role="tabpanel" aria-labelledby="tabBtnLeaves">
+    <div class="section-box">
+      <h3>🏖️ ثبت مرخصی</h3>
+      <div class="guide-card" role="note" aria-label="راهنمای ثبت مرخصی">
+        <span class="guide-card-icon" aria-hidden="true">🏖️</span>
+        <div class="guide-card-content">
+          <b>راهنمای ثبت مرخصی</b>
+          <ul>
+            <li>برای هر روز از ماه، یک مرخصی می‌توانید ثبت کنید.</li>
+            <li>هر مرخصی معادل <b>۷ ساعت و ۳۳ دقیقه</b> است.</li>
+            <li>در روزهایی که شیفت دارید، امکان ثبت مرخصی وجود ندارد.</li>
+            <li>اگر در روزی مرخصی ثبت کنید، در همان روز امکان ثبت شیفت نخواهید داشت.</li>
+            <li>روزهای جمعه قابل انتخاب نیستند.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="leave-table-wrapper">
+        <table class="leave-table" id="leaveTable">
+          <thead>
+            <tr><th>نام</th><th>مرخصی ۱</th><th>مرخصی ۲</th><th>مرخصی ۳</th><th>مرخصی ۴</th><th>مرخصی ۵</th></tr>
+          </thead>
+          <tbody id="leaveTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panelStats" role="tabpanel" aria-labelledby="tabBtnStats">
+    <div class="section-box">
+      <h3>📊 آمار کارکرد و ساعت‌ها</h3>
+      <div class="guide-card" role="note" aria-label="راهنمای محاسبه آمار">
+        <span class="guide-card-icon" aria-hidden="true">📊</span>
+        <div class="guide-card-content">
+          <b>راهنمای محاسبه ساعت‌ها</b>
+          <ul>
+            <li>ساعت کاری هر شیفت: صبح (۶.۵ ساعت)، عصر (۵.۵ ساعت)، شب (۱۲ ساعت).</li>
+            <li>ضریب جمعه طبق قانون محاسبه می‌شود.</li>
+            <li>هر مرخصی معادل ۷:۳۳ ساعت است.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="stats-table-wrapper">
+        <table class="stats-table" id="statsTable">
+          <thead>
+            <tr><th>نام</th><th>موظفی</th><th>صبح</th><th>عصر</th><th>شب</th><th>تعطیلات</th><th>مرخصی</th><th>کارکرد</th><th>اضافه</th><th>کسر</th></tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Excel Modal -->
+<div class="modal-overlay" id="excelModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>📊 خروجی اکسل</h2><button class="modal-close" onclick="closeExcel()">&times;</button></div>
+    <div class="modal-body">
+      <div class="info-banner">خروجی شامل ۵ شیت: <b>برنامه شیفت</b>، <b>آمار کارکرد</b>، <b>مرخصی‌ها</b>، <b>پرسنل</b> و <b>خلاصه</b>.</div>
+      <button class="btn-secondary" style="width:100%; padding:12px; font-size:14px;" onclick="exportExcelFull()">📥 دانلود فایل اکسل (.xlsx)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff Modal -->
+<div class="modal-overlay" id="staffModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>👥 مدیریت پرسنل</h2><button class="modal-close" onclick="closeStaff()">&times;</button></div>
+    <div class="modal-body">
+      <div class="info-banner" id="staffModalInfo">💡 نام و موظفی هر همکار را ویرایش کنید.</div>
+      <div class="btn-add-staff" id="staffAddBox">
+        <input type="text" id="newStaffName" placeholder="نام همکار">
+        <input type="number" id="newStaffReq" placeholder="موظفی" style="width:80px; flex:0;" value="175">
+        <button onclick="addStaff()">➕ افزودن</button>
+      </div>
+      <div class="staff-list" id="staffList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2 id="adminModalTitle">🔑 ورود ادمین</h2><button class="modal-close" onclick="closeAdmin()">&times;</button></div>
+    <div class="modal-body">
+      <div id="adminLoginBox">
+        <div class="info-banner">رمز ادمین را وارد کنید.</div>
+        <input type="password" id="adminPasswordInput" placeholder="رمز ادمین" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit; margin-bottom:12px; background:var(--input-bg); color:var(--text-main);">
+        <button class="btn-primary" style="padding:10px 20px; background:var(--primary-color); color:white; border:none; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:bold; width:100%;" onclick="submitAdminLogin()">ورود</button>
+      </div>
+      <div id="adminPanelBox" style="display:none;">
+        <div class="info-banner">✅ شما ادمین هستید.</div>
+        <button class="btn-secondary" style="width:100%; padding:10px; margin-bottom:10px;" onclick="openChangePassword()">🔐 تغییر رمز ادمین</button>
+        <button class="btn-danger" style="width:100%; padding:10px; background:var(--danger); color:white; border:none; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:bold;" onclick="logoutAdmin()">🚪 خروج از حساب ادمین</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>❓ راهنما</h2><button class="modal-close" onclick="closeHelp()">&times;</button></div>
+    <div class="modal-body">
+      <h3 id="usageHeading" style="font-size:15px; margin:0 0 12px; color:#3b82f6; display:flex; align-items:center; gap:8px;"><span aria-hidden="true" style="font-size:18px;">📝</span><span>نحوه استفاده</span></h3>
+      <ol class="steps-list" role="list" aria-labelledby="usageHeading">
+        <li><span class="step-icon" aria-hidden="true">۱</span><span class="step-text"><b>انتخاب نام:</b> نام خود را از بخش «نام من» در نوار بالای صفحه انتخاب کنید.</span></li>
+        <li><span class="step-icon" aria-hidden="true">۲</span><span class="step-text"><b>ثبت شیفت:</b> با کلیک روی هر خانه در جدول اصلی، شیفت مورد نظر خود را ثبت کنید.</span></li>
+        <li><span class="step-icon" aria-hidden="true">۳</span><span class="step-text"><b>ثبت مرخصی:</b> از تب «جدول مرخصی» استفاده کنید.</span></li>
+        <li><span class="step-icon" aria-hidden="true">۴</span><span class="step-text"><b>مشاهده آمار:</b> ساعت کارکرد و اضافه‌کار خود را در تب «جدول آمار» ببینید.</span></li>
+        <li><span class="step-icon" aria-hidden="true">۵</span><span class="step-text"><b>دریافت خروجی:</b> با دکمه «📊» فایل اکسل کامل را دریافت کنید.</span></li>
+      </ol>
+      <h3 id="rulesHeading" style="font-size:15px; margin:18px 0 12px; color:var(--primary-color); display:flex; align-items:center; gap:8px;"><span aria-hidden="true" style="font-size:18px;">🚫</span><span>قوانین ثبت شیفت</span></h3>
+      <ul class="rules-list" role="list" aria-labelledby="rulesHeading">
+        <li><span class="rule-icon" aria-hidden="true">۱</span><span class="rule-text"><b>ترکیب مجاز شیفت‌ها در یک روز:</b> <span class="rule-badge ok">مجاز</span> صبح + عصر یا عصر + شب</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۲</span><span class="rule-text"><b>ترکیب صبح و شب در یک روز:</b> <span class="rule-badge danger">ممنوع</span> ثبت هم‌زمان شیفت صبح و شب مجاز نیست.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۳</span><span class="rule-text"><b>پس از شیفت شب:</b> <span class="rule-badge danger">ممنوع</span> روز بعد امکان ثبت هیچ شیفتی (صبح/عصر/شب) وجود ندارد.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۴</span><span class="rule-text"><b>شب متوالی:</b> <span class="rule-badge danger">ممنوع</span> ثبت دو شیفت شب پشت سر هم مجاز نیست.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۵</span><span class="rule-text"><b>تعداد شیفت در روز:</b> <span class="rule-badge danger">ممنوع</span> بیش از دو شیفت در یک روز مجاز نیست.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۶</span><span class="rule-text"><b>تکرار نوبت:</b> <span class="rule-badge danger">ممنوع</span> تکرار یک نوبت (مثلاً دو شیفت صبح) در یک روز مجاز نیست.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۷</span><span class="rule-text"><b>مرخصی در روز شیفت:</b> <span class="rule-badge danger">ممنوع</span> در روزهایی که شیفت دارید، امکان ثبت مرخصی وجود ندارد.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۸</span><span class="rule-text"><b>شیفت در روز مرخصی:</b> <span class="rule-badge danger">ممنوع</span> در روزهایی که مرخصی ثبت کرده‌اید، امکان ثبت شیفت وجود ندارد.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۹</span><span class="rule-text"><b>روزهای جمعه:</b> <span class="rule-badge warn">محدودیت</span> برای ثبت مرخصی قابل انتخاب نیستند.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۱۰</span><span class="rule-text"><b>محاسبه مرخصی:</b> <span class="rule-badge ok">توجه</span> هر مرخصی معادل ۷ ساعت و ۳۳ دقیقه محاسبه می‌شود.</span></li>
+        <li><span class="rule-icon" aria-hidden="true">۱۱</span><span class="rule-text"><b>ثبت برای خود:</b> <span class="rule-badge warn">محدودیت</span> ثبت شیفت و مرخصی تنها برای نام انتخاب‌شده در نوار بالا امکان‌پذیر است.</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Dialog -->
+<div class="dialog-overlay" id="dialogOverlay">
+  <div class="dialog-box">
+    <h3 id="dialogTitle"></h3>
+    <p id="dialogMessage"></p>
+    <input type="text" id="dialogInput" style="display:none;">
+    <div class="dialog-actions" id="dialogActions"></div>
+  </div>
+</div>
+  <script>
+const MONTH = "آبان";
+const DAYS = 30;
+const BASE_DATE = new Date(2026, 9, 23);
+const HOURS = { "صبح": 6.5, "عصر": 5.5, "شب": 12 };
+const LEAVE_HOURS = 7.55;
+const MAX_LEAVE = 5;
+const WEEKDAYS = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
+
+const DEFAULT_PERSONNEL = [
+  { name: "خانم موسوی", req: 175 }, { name: "خانم قابل", req: 175 }, { name: "خانم پیغمبری", req: 175 },
+  { name: "خانم رضایی", req: 175 }, { name: "خانم شاهسون", req: 144 }, { name: "خانم غلامی", req: 144 },
+  { name: "خانم هنرمند", req: 175 }, { name: "خانم بابایی", req: 175 }, { name: "خانم یوسفی", req: 175 },
+  { name: "خانم یاقوتی", req: 175 }, { name: "خانم دافعی", req: 88 }, { name: "خانم رنجبر", req: 184 },
+  { name: "خانم شکیب", req: 184 }, { name: "خانم براتی", req: 184 }, { name: "خانم رحمانی", req: 184 },
+  { name: "خانم چراغ چشم", req: 184 }, { name: "خانم امیری", req: 184 },
+  { name: "خانم حشمتی", req: 175 }
+].sort((a, b) => a.name.localeCompare(b.name, 'fa'));
+
+const DEFAULT_ADMIN_HASH = "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f";
+
+let PERSONNEL = [];
+let state = { shifts: {}, leaves: {} };
+let selectedZone = "";
+let isAdmin = false;
+let adminPasswordHash = DEFAULT_ADMIN_HASH;
+let alertTimeout = null;
+let warnTimeout = null;
+
+const ZONES = [
+  { name: "بهارستان ۱", cols: ["صبح", "عصر", "شب"], cls: "bg-z1" },
+  { name: "بهارستان ۲", cols: ["صبح", "عصر", "شب"], cls: "bg-z2" },
+  { name: "بهارستان ۳", cols: ["صبح", "عصر", "شب"], cls: "bg-z3" },
+  { name: "نجمه خاتون", cols: ["صبح", "عصر", "شب"], cls: "bg-z4" },
+  { name: "گلشن", cols: ["صبح", "عصر"], cls: "bg-z5" }
+];
+
+function getDayInfo(dayIdx) {
+  const d = new Date(BASE_DATE);
+  d.setDate(BASE_DATE.getDate() + dayIdx);
+  return { date: d, weekday: WEEKDAYS[d.getDay()], isFriday: d.getDay() === 5 };
+}
+
+async function sha256(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* ---------- جستجو (پچ باگ ۱۱) ---------- */
+function filterPersonnel() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  document.querySelectorAll("select.s-cell, select.leave-select").forEach(sel => {
+    Array.from(sel.options).forEach(opt => {
+      if (!opt.value) return;
+      opt.style.display = opt.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+  const leaveRows = document.querySelectorAll("#leaveTableBody tr");
+  leaveRows.forEach(tr => {
+    const nameCell = tr.querySelector(".leave-name-cell");
+    if (!nameCell) return;
+    const name = nameCell.textContent.trim().toLowerCase();
+    tr.style.display = (q === "" || name.includes(q)) ? "" : "none";
+  });
+}
+
+/* ---------- Tabs ---------- */
+function switchTab(name) {
+  const map = {
+    shifts: { btn: "tabBtnShifts", panel: "panelShifts" },
+    leaves: { btn: "tabBtnLeaves", panel: "panelLeaves" },
+    stats:  { btn: "tabBtnStats",  panel: "panelStats"  }
+  };
+  Object.values(map).forEach(({ btn, panel }) => {
+    const b = document.getElementById(btn);
+    const p = document.getElementById(panel);
+    if (b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); }
+    if (p) p.classList.remove("active");
+  });
+  const cur = map[name];
+  if (!cur) return;
+  document.getElementById(cur.btn).classList.add("active");
+  document.getElementById(cur.btn).setAttribute("aria-selected", "true");
+  document.getElementById(cur.panel).classList.add("active");
+  localStorage.setItem("activeTab", name);
+  if (name === "stats") renderStats();
+  if (name === "leaves") renderLeaveGrid();
+}
+
+/* ---------- Excel ---------- */
+function openExcel() { document.getElementById("excelModal").classList.add("active"); }
+function closeExcel() { document.getElementById("excelModal").classList.remove("active"); }
+
+function exportExcelFull() {
+  if (typeof XLSX === "undefined") { alert("کتابخانه اکسل بارگذاری نشد."); return; }
+  if (PERSONNEL.length === 0) { alert("پرسنل خالی است."); return; }
+
+  const ST = {
+    font: { name: "Vazirmatn", sz: 11, color: { rgb: "1E293B" } },
+    fontBold: { name: "Vazirmatn", sz: 11, bold: true, color: { rgb: "1E293B" } },
+    fontWhite: { name: "Vazirmatn", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+    border: { top: { style: "thin", color: { rgb: "CBD5E1" } }, bottom: { style: "thin", color: { rgb: "CBD5E1" } }, left: { style: "thin", color: { rgb: "CBD5E1" } }, right: { style: "thin", color: { rgb: "CBD5E1" } } },
+    alignCenter: { horizontal: "center", vertical: "center", wrapText: true, readingOrder: 2 },
+    alignRight: { horizontal: "right", vertical: "center", wrapText: true, readingOrder: 2 }
+  };
+  const ZONE_HEADER_BG = { "بهارستان ۱": "0369A1", "بهارستان ۲": "15803D", "بهارستان ۳": "C2410C", "نجمه خاتون": "A16207", "گلشن": "6B21A8" };
+  function styleCell(ws, r, c, st) { const ref = XLSX.utils.encode_cell({ r, c }); if (!ws[ref]) ws[ref] = { v: "", t: "s" }; ws[ref].s = st; }
+  function applyRange(ws, r1, c1, r2, c2, st) { for (let r = r1; r <= r2; r++) for (let c = c1; c <= c2; c++) styleCell(ws, r, c, st); }
+
+  const wb = XLSX.utils.book_new();
+  wb.Workbook = { Views: [{ RTL: true }] };
+
+  const sheet1 = [["روز", "تاریخ"]];
+  ZONES.forEach(z => z.cols.forEach(() => sheet1[0].push(z.name)));
+  const row2 = ["", ""];
+  ZONES.forEach(z => z.cols.forEach(c => row2.push(c)));
+  sheet1.push(row2);
+  for (let d = 0; d < DAYS; d++) {
+    const info = getDayInfo(d);
+    const row = [info.weekday, (d + 1) + " " + MONTH];
+    ZONES.forEach(zone => zone.cols.forEach(shiftType => { row.push(state.shifts[d + "|" + zone.name + "|" + shiftType] || ""); }));
+    sheet1.push(row);
+  }
+  const ws1 = XLSX.utils.aoa_to_sheet(sheet1);
+  const cols1 = [{ wch: 10 }, { wch: 12 }]; for (let i = 0; i < 15; i++) cols1.push({ wch: 14 });
+  ws1["!cols"] = cols1; ws1["!rows"] = [{ hpt: 28 }, { hpt: 22 }];
+  for (let i = 2; i < DAYS + 2; i++) ws1["!rows"].push({ hpt: 20 });
+  applyRange(ws1, 0, 0, DAYS + 1, 1, { font: ST.fontBold, fill: { fgColor: { rgb: "F1F5F9" } }, border: ST.border, alignment: ST.alignCenter });
+  let col = 2;
+  ZONES.forEach(zone => {
+    const bg = ZONE_HEADER_BG[zone.name] || "1E293B";
+    const st = { font: ST.fontWhite, fill: { fgColor: { rgb: bg } }, border: ST.border, alignment: ST.alignCenter };
+    for (let i = 0; i < zone.cols.length; i++) { styleCell(ws1, 0, col + i, st); styleCell(ws1, 1, col + i, st); }
+    col += zone.cols.length;
+  });
+  for (let d = 0; d < DAYS; d++) {
+    const info = getDayInfo(d);
+    for (let c = 2; c < row2.length; c++) styleCell(ws1, d + 2, c, { font: ST.fontBold, fill: { fgColor: { rgb: info.isFriday ? "FEF3C7" : "FFFFFF" } }, border: ST.border, alignment: ST.alignCenter });
+  }
+  ws1["!freeze"] = { xSplit: 2, ySplit: 2 };
+  XLSX.utils.book_append_sheet(wb, ws1, "برنامه شیفت");
+
+  const sheet2 = [["نام", "موظفی", "صبح", "عصر", "شب", "تعطیلات", "مرخصی", "کارکرد کل", "اضافه", "کسر"]];
+  const morningHours = {}, eveningHours = {}, nightHours = {}, holidayExtra = {}, leaveCount = {};
+  PERSONNEL.forEach(p => { morningHours[p.name] = 0; eveningHours[p.name] = 0; nightHours[p.name] = 0; holidayExtra[p.name] = 0; leaveCount[p.name] = 0; });
+  Object.keys(state.leaves).forEach(person => { if (leaveCount[person] !== undefined) leaveCount[person] = Object.keys(state.leaves[person]).length; });
+  for (let d = 0; d < DAYS; d++) {
+    ZONES.forEach(zone => zone.cols.forEach(shiftType => {
+      const person = state.shifts[d + "|" + zone.name + "|" + shiftType];
+      if (!person) return;
+      const pInfo = PERSONNEL.find(p => p.name === person); if (!pInfo) return;
+      const { holiday } = calcShiftHours(shiftType, d, pInfo.req);
+      holidayExtra[person] += holiday;
+      if (shiftType === "صبح") morningHours[person] += HOURS["صبح"];
+      else if (shiftType === "عصر") eveningHours[person] += HOURS["عصر"];
+      else if (shiftType === "شب") nightHours[person] += HOURS["شب"];
+    }));
+  }
+  PERSONNEL.forEach(p => {
+    const totalShift = morningHours[p.name] + eveningHours[p.name] + nightHours[p.name] + holidayExtra[p.name];
+    const leaveH = Math.round((leaveCount[p.name] * LEAVE_HOURS) * 100) / 100;
+    const total = Math.round((totalShift + leaveH) * 10) / 10;
+    const diff = Math.round((total - p.req) * 10) / 10;
+    sheet2.push([p.name, p.req, morningHours[p.name], eveningHours[p.name], nightHours[p.name], Math.round(holidayExtra[p.name] * 10) / 10, leaveH, total, diff > 0 ? diff : 0, diff < 0 ? Math.abs(diff) : 0]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(sheet2);
+  ws2["!cols"] = [{ wch: 18 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 14 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 8 }];
+  ws2["!rows"] = [{ hpt: 28 }]; for (let i = 1; i <= PERSONNEL.length; i++) ws2["!rows"].push({ hpt: 22 });
+  applyRange(ws2, 0, 0, 0, 9, { font: ST.fontWhite, fill: { fgColor: { rgb: "1E293B" } }, border: ST.border, alignment: ST.alignCenter });
+  for (let r = 1; r <= PERSONNEL.length; r++) {
+    applyRange(ws2, r, 0, r, 9, { font: ST.font, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignCenter });
+    styleCell(ws2, r, 0, { font: ST.fontBold, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignRight });
+  }
+  ws2["!freeze"] = { ySplit: 1 };
+  XLSX.utils.book_append_sheet(wb, ws2, "آمار کارکرد");
+
+  const sheet3 = [["نام", "مرخصی ۱", "مرخصی ۲", "مرخصی ۳", "مرخصی ۴", "مرخصی ۵", "تعداد"]];
+  PERSONNEL.forEach(p => {
+    const personLeaves = state.leaves[p.name] || {};
+    const leaveDays = Object.keys(personLeaves).map(Number).sort((a, b) => a - b);
+    const row = [p.name];
+    for (let i = 0; i < MAX_LEAVE; i++) {
+      if (leaveDays[i] !== undefined) { const info = getDayInfo(leaveDays[i]); row.push(info.weekday + " " + (leaveDays[i] + 1) + " " + MONTH); }
+      else row.push("");
+    }
+    row.push(leaveDays.length); sheet3.push(row);
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(sheet3);
+  ws3["!cols"] = [{ wch: 18 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 8 }];
+  ws3["!rows"] = [{ hpt: 28 }]; for (let i = 1; i <= PERSONNEL.length; i++) ws3["!rows"].push({ hpt: 22 });
+  applyRange(ws3, 0, 0, 0, 6, { font: ST.fontWhite, fill: { fgColor: { rgb: "1E293B" } }, border: ST.border, alignment: ST.alignCenter });
+  for (let r = 1; r <= PERSONNEL.length; r++) {
+    applyRange(ws3, r, 0, r, 6, { font: ST.font, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignCenter });
+    styleCell(ws3, r, 0, { font: ST.fontBold, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignRight });
+  }
+  ws3["!freeze"] = { ySplit: 1 };
+  XLSX.utils.book_append_sheet(wb, ws3, "مرخصی‌ها");
+
+  const sheet4 = [["ردیف", "نام", "موظفی (ساعت)"]];
+  PERSONNEL.forEach((p, i) => sheet4.push([i + 1, p.name, p.req]));
+  const ws4 = XLSX.utils.aoa_to_sheet(sheet4);
+  ws4["!cols"] = [{ wch: 6 }, { wch: 22 }, { wch: 14 }];
+  ws4["!rows"] = [{ hpt: 28 }]; for (let i = 1; i <= PERSONNEL.length; i++) ws4["!rows"].push({ hpt: 22 });
+  applyRange(ws4, 0, 0, 0, 2, { font: ST.fontWhite, fill: { fgColor: { rgb: "1E293B" } }, border: ST.border, alignment: ST.alignCenter });
+  for (let r = 1; r <= PERSONNEL.length; r++) {
+    applyRange(ws4, r, 0, r, 2, { font: ST.font, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignCenter });
+    styleCell(ws4, r, 1, { font: ST.fontBold, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignRight });
+  }
+  ws4["!freeze"] = { ySplit: 1 };
+  XLSX.utils.book_append_sheet(wb, ws4, "پرسنل");
+
+  let totalLeave = 0; Object.values(state.leaves).forEach(l => totalLeave += Object.keys(l).length);
+  let totalAllHours = 0;
+  PERSONNEL.forEach(p => {
+    const totalShift = morningHours[p.name] + eveningHours[p.name] + nightHours[p.name] + holidayExtra[p.name];
+    const leaveH = Math.round((leaveCount[p.name] * LEAVE_HOURS) * 100) / 100;
+    totalAllHours += Math.round((totalShift + leaveH) * 10) / 10;
+  });
+  const sheet5 = [["عنوان", "مقدار"], ["ماه", MONTH + " ۱۴۰۵"], ["تعداد روزهای ماه", DAYS], ["تعداد پرسنل", PERSONNEL.length],
+    ["تعداد شیفت‌ها", Object.keys(state.shifts).filter(k => state.shifts[k]).length], ["تعداد مرخصی‌ها", totalLeave],
+    ["جمع کل ساعت کارکرد", Math.round(totalAllHours * 10) / 10], ["تاریخ خروجی", new Date().toLocaleString("fa-IR")]];
+  const ws5 = XLSX.utils.aoa_to_sheet(sheet5);
+  ws5["!cols"] = [{ wch: 30 }, { wch: 22 }]; ws5["!rows"] = [{ hpt: 28 }];
+  for (let i = 1; i < sheet5.length; i++) ws5["!rows"].push({ hpt: 24 });
+  applyRange(ws5, 0, 0, 0, 1, { font: ST.fontWhite, fill: { fgColor: { rgb: "1E293B" } }, border: ST.border, alignment: ST.alignCenter });
+  for (let r = 1; r < sheet5.length; r++) {
+    applyRange(ws5, r, 0, r, 1, { font: ST.font, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignCenter });
+    styleCell(ws5, r, 0, { font: ST.fontBold, fill: { fgColor: { rgb: r % 2 === 0 ? "F8FAFC" : "FFFFFF" } }, border: ST.border, alignment: ST.alignRight });
+  }
+  XLSX.utils.book_append_sheet(wb, ws5, "خلاصه");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/octet-stream" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "شیفت-آبان-۱۴۰۵.xlsx";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  closeExcel();
+  showAlert("✅ فایل اکسل دانلود شد.");
+}
+
+/* ---------- Admin ---------- */
+function updateAdminUI() {
+  document.body.classList.toggle("is-admin", isAdmin);
+  const btn = document.getElementById("adminBtn");
+  btn.textContent = isAdmin ? "👑" : "🔑";
+  btn.classList.toggle("logged-in", isAdmin);
+  document.querySelectorAll(".admin-only").forEach(el => el.style.display = isAdmin ? "" : "none");
+}
+function onAdminBtnClick() { isAdmin ? openAdminPanel() : openAdminLogin(); }
+function openAdminLogin() {
+  document.getElementById("adminModalTitle").textContent = "🔑 ورود ادمین";
+  document.getElementById("adminLoginBox").style.display = "block";
+  document.getElementById("adminPanelBox").style.display = "none";
+  document.getElementById("adminPasswordInput").value = "";
+  document.getElementById("adminModal").classList.add("active");
+  setTimeout(() => document.getElementById("adminPasswordInput").focus(), 100);
+}
+function openAdminPanel() {
+  document.getElementById("adminModalTitle").textContent = "👑 پنل ادمین";
+  document.getElementById("adminLoginBox").style.display = "none";
+  document.getElementById("adminPanelBox").style.display = "block";
+  document.getElementById("adminModal").classList.add("active");
+}
+function closeAdmin() { document.getElementById("adminModal").classList.remove("active"); }
+
+async function submitAdminLogin() {
+  const input = document.getElementById("adminPasswordInput");
+  const hash = await sha256(input.value);
+  if (hash === adminPasswordHash) {
+    isAdmin = true;
+    sessionStorage.setItem("isAdmin", "1");
+    updateAdminUI(); renderAll();
+    closeAdmin();
+    showAlert("✅ خوش آمدید، ادمین عزیز!");
+  } else {
+    showAlert("⛔ رمز عبور وارد شده اشتباه است.");
+    input.value = ""; input.focus();
+  }
+}
+function logoutAdmin() {
+  isAdmin = false;
+  sessionStorage.removeItem("isAdmin");
+  updateAdminUI(); renderAll();
+  closeAdmin(); showAlert("🚪 خارج شدید.");
+}
+async function openChangePassword() {
+  const oldPw = await promptDlg("رمز فعلی را وارد کنید:", "", "تغییر رمز");
+  if (oldPw === null) return;
+  const oldHash = await sha256(oldPw);
+  if (oldHash !== adminPasswordHash) { await alertDlg("⛔ رمز فعلی اشتباه است."); return; }
+  const newPw = await promptDlg("رمز جدید (حداقل ۴ کاراکتر):", "", "تغییر رمز");
+  if (!newPw) return;
+  if (newPw.length < 4) { await alertDlg("⛔ رمز جدید باید حداقل ۴ کاراکتر باشد."); return; }
+  adminPasswordHash = await sha256(newPw);
+  localStorage.setItem("adminPasswordHash", adminPasswordHash);
+  await alertDlg("✅ رمز ادمین تغییر کرد.");
+}
+
+/* ---------- Dialog ---------- */
+function dialog(opts) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById("dialogOverlay"), title = document.getElementById("dialogTitle"), msg = document.getElementById("dialogMessage"), input = document.getElementById("dialogInput"), actions = document.getElementById("dialogActions");
+    title.textContent = opts.title || ""; msg.textContent = opts.message || ""; input.value = opts.defaultValue || ""; input.style.display = opts.input ? "block" : "none"; actions.innerHTML = "";
+    const finish = (val) => { overlay.classList.remove("active"); resolve(val); };
+    if (opts.input) {
+      const ok = document.createElement("button"); ok.className = "btn-primary"; ok.textContent = opts.okText || "تأیید"; ok.onclick = () => finish(input.value.trim());
+      const cancel = document.createElement("button"); cancel.className = "btn-cancel"; cancel.textContent = "انصراف"; cancel.onclick = () => finish(null);
+      actions.append(ok, cancel); input.focus(); input.onkeydown = (e) => { if (e.key === "Enter") finish(input.value.trim()); if (e.key === "Escape") finish(null); };
+    } else if (opts.confirm) {
+      const ok = document.createElement("button"); ok.className = opts.danger ? "btn-danger" : "btn-primary"; ok.textContent = opts.okText || "تأیید"; ok.onclick = () => finish(true);
+      const cancel = document.createElement("button"); cancel.className = "btn-cancel"; cancel.textContent = "انصراف"; cancel.onclick = () => finish(false);
+      actions.append(ok, cancel);
+    } else {
+      const ok = document.createElement("button"); ok.className = "btn-primary"; ok.textContent = "باشه"; ok.onclick = () => finish(true); actions.append(ok);
+    }
+    overlay.classList.add("active");
+  });
+}
+const alertDlg = (msg, title = "توجه") => dialog({ title, message: msg });
+const confirmDlg = (msg, title = "تأیید", danger = false) => dialog({ title, message: msg, confirm: true, danger });
+const promptDlg = (msg, def = "", title = "ورودی") => dialog({ title, message: msg, input: true, defaultValue: def });
+
+/* ---------- Permission ---------- */
+function canEditShiftCell(shiftOwner) {
+  if (isAdmin) return true;
+  const myName = document.getElementById("myName").value;
+  if (!myName) return false;
+  return shiftOwner === "" || shiftOwner === myName;
+}
+function canEditLeaveRow(personName) {
+  if (isAdmin) return true;
+  return document.getElementById("myName").value === personName;
+}
+
+/* ---------- Personnel ---------- */
+function savePersonnel() { localStorage.setItem("personnelData", JSON.stringify(PERSONNEL)); }
+
+async function addStaff() {
+  if (!isAdmin) { await alertDlg("⛔ این عملیات تنها توسط ادمین امکان‌پذیر است."); return; }
+  const nameInput = document.getElementById("newStaffName"), reqInput = document.getElementById("newStaffReq");
+  const name = nameInput.value.trim(), req = parseFloat(reqInput.value);
+  if (!name) { await alertDlg("⛔ لطفاً نام همکار را وارد کنید."); return; }
+  if (PERSONNEL.some(p => p.name === name)) { await alertDlg("⛔ این نام قبلاً ثبت شده است."); return; }
+  if (isNaN(req) || req < 0) { await alertDlg("⛔ مقدار موظفی وارد شده معتبر نیست."); return; }
+  PERSONNEL.push({ name, req }); PERSONNEL.sort((a, b) => a.name.localeCompare(b.name, 'fa'));
+  savePersonnel(); renderStaffList(); updateNameSelect(); renderAll();
+  nameInput.value = ""; reqInput.value = "175";
+}
+
+async function removeStaff(index) {
+  if (!isAdmin) { await alertDlg("⛔ این عملیات تنها توسط ادمین امکان‌پذیر است."); return; }
+  const p = PERSONNEL[index];
+  const ok = await confirmDlg(`حذف «${p.name}»؟`, "حذف", true);
+  if (!ok) return;
+  PERSONNEL.splice(index, 1);
+  Object.keys(state.shifts).forEach(k => { if (state.shifts[k] === p.name) delete state.shifts[k]; });
+  delete state.leaves[p.name];
+  savePersonnel(); save();
+  renderStaffList(); updateNameSelect(); renderAll();
+}
+
+function renderStaffList() {
+  const list = document.getElementById("staffList"); list.innerHTML = "";
+  if (PERSONNEL.length === 0) { list.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>هیچ همکاری ثبت نشده است.</p>"; return; }
+  PERSONNEL.forEach((p, i) => {
+    const div = document.createElement("div"); div.className = "staff-item";
+    div.innerHTML = `<span class="staff-info">${p.name}</span><input type="number" class="req-input" value="${p.req}" data-idx="${i}" ${isAdmin ? "" : "disabled"}>${isAdmin ? `<button class="btn-del" data-del="${i}">حذف</button>` : ""}`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll("input.req-input").forEach(inp => {
+    inp.addEventListener("change", () => {
+      if (!isAdmin) return;
+      const idx = +inp.dataset.idx, v = parseFloat(inp.value);
+      if (!isNaN(v) && v >= 0) { PERSONNEL[idx].req = v; savePersonnel(); renderAll(); }
+      else inp.value = PERSONNEL[idx].req;
+    });
+  });
+  list.querySelectorAll("button.btn-del").forEach(btn => btn.addEventListener("click", () => removeStaff(+btn.dataset.del)));
+  const info = document.getElementById("staffModalInfo"), addBox = document.getElementById("staffAddBox");
+  if (isAdmin) { info.innerHTML = "💡 ویرایش پرسنل."; addBox.style.display = "flex"; }
+  else { info.innerHTML = "ℹ️ تنها ادمین می‌تواند پرسنل را ویرایش کند."; addBox.style.display = "none"; }
+}
+
+function updateNameSelect() {
+  const sel = document.getElementById("myName"); sel.innerHTML = '<option value="">انتخاب...</option>';
+  PERSONNEL.forEach(p => { const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; sel.appendChild(o); });
+  const savedName = localStorage.getItem("myName");
+  if (savedName && PERSONNEL.some(p => p.name === savedName)) sel.value = savedName;
+}
+
+function renderAll() { renderTable(); renderLeaveGrid(); renderStats(); }
+
+function zoneVisible(zoneName) { return !selectedZone || selectedZone === zoneName; }
+
+function renderTable() {
+  const zoneHeaderRow = document.getElementById("zoneHeaderRow");
+  Array.from(zoneHeaderRow.children).forEach((el, idx) => { if (idx >= 2) el.remove(); });
+  const subHead = document.getElementById("subHeader"); subHead.innerHTML = "";
+
+  ZONES.forEach(zone => {
+    const th = document.createElement("th");
+    th.className = "th-zone " + zone.cls + (zoneVisible(zone.name) ? "" : " col-hidden");
+    th.colSpan = zone.cols.length; th.textContent = zone.name;
+    zoneHeaderRow.appendChild(th);
+    zone.cols.forEach(shift => {
+      const sh = document.createElement("th");
+      sh.textContent = shift;
+      sh.className = "th-shift " + zone.cls + (zoneVisible(zone.name) ? "" : " col-hidden");
+      subHead.appendChild(sh);
+    });
+  });
+
+  const tbody = document.getElementById("tableBody"); tbody.innerHTML = "";
+  const myName = document.getElementById("myName").value;
+
+  for (let d = 0; d < DAYS; d++) {
+    const info = getDayInfo(d);
+    const tr = document.createElement("tr");
+    if (info.isFriday) tr.classList.add("is-friday");
+    const tdDay = document.createElement("td"); tdDay.textContent = info.weekday; tdDay.className = "day-cell"; tr.appendChild(tdDay);
+    const tdDate = document.createElement("td"); tdDate.textContent = (d + 1) + " " + MONTH; tdDate.className = "date-cell"; tr.appendChild(tdDate);
+    ZONES.forEach(zone => {
+      zone.cols.forEach(shiftType => {
+        const td = document.createElement("td");
+        if (!zoneVisible(zone.name)) td.classList.add("col-hidden");
+        const key = d + "|" + zone.name + "|" + shiftType;
+        const sel = document.createElement("select");
+        sel.className = "s-cell";
+        sel.dataset.key = key; sel.dataset.day = d; sel.dataset.zone = zone.name; sel.dataset.shift = shiftType;
+        const empty = document.createElement("option"); empty.value = ""; empty.textContent = "—"; sel.appendChild(empty);
+        PERSONNEL.forEach(p => { const o = document.createElement("option"); o.value = p.name; o.textContent = p.name; sel.appendChild(o); });
+        sel.value = state.shifts[key] || "";
+        const owner = state.shifts[key] || "";
+        if (!canEditShiftCell(owner)) { sel.disabled = true; sel.classList.add("locked"); }
+        else sel.addEventListener("change", () => onShiftChange(sel));
+        if (sel.value === myName && sel.value !== "") sel.classList.add("mine");
+        if (sel.value !== "") sel.classList.add("filled");
+        td.appendChild(sel); tr.appendChild(td);
+      });
+    });
+    tbody.appendChild(tr);
+  }
+}
+
+function findPersonShiftOnDay(person, dayIdx) {
+  const types = [];
+  ZONES.forEach(z => z.cols.forEach(s => { if (state.shifts[dayIdx + "|" + z.name + "|" + s] === person) types.push(s); }));
+  return types;
+}
+
+/* ---------- بررسی قوانین شیفت (پچ باگ ۱ — بدون تکرار) ---------- */
+function checkRestRules(person, dayIdx) {
+  const issues = [];
+  const todayShifts = findPersonShiftOnDay(person, dayIdx);
+  const prevShifts = dayIdx > 0 ? findPersonShiftOnDay(person, dayIdx - 1) : [];
+  const nextShifts = dayIdx < DAYS - 1 ? findPersonShiftOnDay(person, dayIdx + 1) : [];
+
+    if (prevShifts.includes("شب") && todayShifts.length > 0) issues.push({ type: "night-rest", msg: "شما دیشب شیفت شب داشته‌اید؛ بنابراین امروز امکان ثبت هیچ شیفتی (صبح/عصر/شب) را ندارید." });
+  if (todayShifts.includes("شب") && nextShifts.length > 0) issues.push({ type: "night-next", msg: "شما امروز شیفت شب دارید؛ بنابراین فردا امکان ثبت هیچ شیفتی (صبح/عصر/شب) را ندارید." });
+  if (todayShifts.includes("شب") && todayShifts.includes("صبح")) issues.push({ type: "morning-night", msg: "ثبت هم‌زمان شیفت صبح و شب در یک روز مجاز نیست." });
+  if (todayShifts.includes("شب") && prevShifts.includes("شب")) issues.push({ type: "night-night-prev", msg: "ثبت دو شیفت شب متوالی (شب قبل) مجاز نیست." });
+  if (todayShifts.includes("شب") && nextShifts.includes("شب")) issues.push({ type: "night-night-next", msg: "ثبت دو شیفت شب متوالی (شب بعد) مجاز نیست." });
+  if (todayShifts.length > 2) issues.push({ type: "too-many", msg: "ثبت بیش از دو شیفت در یک روز مجاز نیست." });
+  if (todayShifts.length === 2) {
+    const uniq = [...new Set(todayShifts)];
+    const okCombo = (uniq.includes("صبح") && uniq.includes("عصر") && !uniq.includes("شب")) || (uniq.includes("عصر") && uniq.includes("شب") && !uniq.includes("صبح"));
+    if (!okCombo) issues.push({ type: "bad-combo", msg: "ترکیب شیفت‌های انتخابی نامعتبر است؛ تنها ترکیب صبح+عصر یا عصر+شب مجاز است." });
+  }
+  return issues;
+}
+
+function hasDuplicateShiftType(person, dayIdx, shiftType, excludeKey) {
+  let dup = false;
+  ZONES.forEach(z => {
+    if (!z.cols.includes(shiftType)) return;
+    const key = dayIdx + "|" + z.name + "|" + shiftType;
+    if (key === excludeKey) return;
+    if (state.shifts[key] === person) dup = true;
+  });
+  return dup;
+}
+
+/* ---------- تغییر شیفت ---------- */
+async function onShiftChange(sel) {
+  const key = sel.dataset.key, val = sel.value, d = +sel.dataset.day, shiftType = sel.dataset.shift;
+  const prevOwner = state.shifts[key] || "";
+  hideAlert();
+
+  if (!canEditShiftCell(prevOwner)) {
+    await alertDlg("⛔ این خانه به همکار دیگری تعلق دارد و قابل ویرایش نیست.");
+    sel.value = prevOwner;
+    return;
+  }
+
+  if (!val) {
+    delete state.shifts[key];
+    save();
+    if (prevOwner) {
+      for (const dd of [d - 1, d, d + 1]) {
+        if (dd < 0 || dd >= DAYS) continue;
+        const issues = checkRestRules(prevOwner, dd);
+        if (issues.length > 0) {
+          showWarning("⚠️ توجه: پس از حذف شیفت، برای «" + prevOwner + "» در روز " + (dd + 1) + " " + MONTH + " ناسازگاری باقی مانده است.");
+        }
+      }
+    }
+    renderAll();
+    return;
+  }
+
+  let personName = val;
+  if (!isAdmin) {
+    const myName = document.getElementById("myName").value;
+    if (!myName) { await alertDlg("👋 لطفاً ابتدا نام خود را از نوار بالا انتخاب کنید."); sel.value = prevOwner; return; }
+    if (val !== myName) { await alertDlg("⛔ ثبت شیفت برای سایر همکاران مجاز نیست؛ تنها شیفت خودتان قابل ثبت است."); sel.value = prevOwner; return; }
+  }
+
+  if (hasDuplicateShiftType(personName, d, shiftType, key)) {
+    await alertDlg("⛔ شما قبلاً همین نوبت را ثبت کرده‌اید.");
+    sel.value = prevOwner;
+    return;
+  }
+
+  const personLeaves = state.leaves[personName] || {};
+  if (Object.prototype.hasOwnProperty.call(personLeaves, String(d))) {
+    await alertDlg("⛔ برای این روز مرخصی ثبت کرده‌اید؛ امکان ثبت شیفت وجود ندارد. ابتدا مرخصی آن روز را از تب «جدول مرخصی» حذف کنید.");
+    sel.value = prevOwner;
+    return;
+  }
+
+  const prev = state.shifts[key];
+  state.shifts[key] = personName;
+  const issues = checkRestRules(personName, d);
+  if (issues.length > 0) {
+    state.shifts[key] = prev || "";
+    sel.value = prev || "";
+    await alertDlg("⛔ قوانین:\n• " + issues.map(i => i.msg).join("\n• "));
+    return;
+  }
+  save(); renderAll();
+}
+
+/* ---------- جدول مرخصی ---------- */
+function renderLeaveGrid() {
+  const tbody = document.getElementById("leaveTableBody"); tbody.innerHTML = "";
+  if (PERSONNEL.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding:20px; color:var(--text-muted);'>ابتدا پرسنل را ثبت کنید.</td></tr>";
+    return;
+  }
+  PERSONNEL.forEach(p => {
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td"); tdName.className = "leave-name-cell"; tdName.textContent = p.name; tr.appendChild(tdName);
+
+    const personLeaves = state.leaves[p.name] || {};
+    const leaveDays = Object.keys(personLeaves).map(Number).sort((a, b) => a - b);
+    const canEdit = canEditLeaveRow(p.name);
+
+    for (let i = 0; i < MAX_LEAVE; i++) {
+      const td = document.createElement("td");
+      const sel = document.createElement("select"); sel.className = "leave-select";
+      if (!canEdit) { sel.disabled = true; sel.classList.add("locked"); }
+      const empty = document.createElement("option"); empty.value = ""; empty.textContent = "—"; sel.appendChild(empty);
+      for (let d = 1; d <= DAYS; d++) {
+        const dayIndex = d - 1;
+        if (getDayInfo(dayIndex).isFriday) continue;
+        const o = document.createElement("option"); o.value = dayIndex; o.textContent = d + " " + MONTH; sel.appendChild(o);
+      }
+      if (leaveDays[i] !== undefined) sel.value = leaveDays[i];
+
+      sel.addEventListener("change", async () => {
+        if (!canEditLeaveRow(p.name)) {
+          await alertDlg("⛔ ثبت مرخصی برای سایر همکاران مجاز نیست؛ تنها مرخصی خودتان قابل ثبت است.");
+          sel.value = "";
+          return;
+        }
+
+        const rowSelects = [];
+        let currentNode = tdName.nextElementSibling;
+        for (let k = 0; k < MAX_LEAVE; k++) { rowSelects.push(currentNode.querySelector("select")); currentNode = currentNode.nextElementSibling; }
+
+        const newLeaves = {};
+        let hasDuplicate = false, changedIsDuplicate = false;
+        rowSelects.forEach(s => {
+          if (s.value === "") return;
+          if (newLeaves[s.value]) { hasDuplicate = true; if (s === sel) changedIsDuplicate = true; }
+          else newLeaves[s.value] = true;
+        });
+        if (hasDuplicate) {
+          await alertDlg("⛔ یک تاریخ را نمی‌توانید دو بار ثبت کنید.");
+          if (changedIsDuplicate) sel.value = "";
+          return;
+        }
+
+        if (sel.value !== "") {
+          const dayIdx = parseInt(sel.value);
+          const shiftsThatDay = findPersonShiftOnDay(p.name, dayIdx);
+          if (shiftsThatDay.length > 0) {
+            const shiftNames = shiftsThatDay.map(s => {
+              let zoneName = "";
+              ZONES.forEach(z => z.cols.forEach(sh => {
+                if (sh === s && state.shifts[dayIdx + "|" + z.name + "|" + sh] === p.name) zoneName = z.name;
+              }));
+              return s + (zoneName ? " (" + zoneName + ")" : "");
+            }).join(" ، ");
+            await alertDlg("⛔ برای این روز شیفت ثبت کرده‌اید (" + shiftNames + ")؛ امکان ثبت مرخصی وجود ندارد. ابتدا شیفت آن روز را از تب «برنامه شیفت» حذف کنید.");
+            sel.value = "";
+            return;
+          }
+        }
+
+        if (Object.keys(newLeaves).length === 0) {
+          delete state.leaves[p.name];
+        } else {
+          state.leaves[p.name] = newLeaves;
+        }
+        save(); renderStats();
+      });
+      td.appendChild(sel); tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------- محاسبه ساعت ---------- */
+function calcShiftHours(shiftType, dayIdx, requiredHours) {
+  const baseHours = HOURS[shiftType], is184 = (requiredHours === 184);
+  const info = getDayInfo(dayIdx), nextInfo = getDayInfo(dayIdx + 1);
+  if (shiftType === "صبح" || shiftType === "عصر") {
+    if (info.isFriday) return { total: baseHours * 1.5, holiday: baseHours * 0.5, base: baseHours };
+    return { total: baseHours, holiday: 0, base: baseHours };
+  }
+  let holidayHours = 0;
+  if (is184) { if (nextInfo.isFriday) holidayHours = 7.5; else if (info.isFriday) holidayHours = 4.5; }
+  else { if (info.isFriday) holidayHours = 12; }
+  const extra = holidayHours * 0.5;
+  return { total: baseHours + extra, holiday: extra, base: baseHours };
+}
+
+function renderStats() {
+  const tbody = document.getElementById("statsBody"); tbody.innerHTML = ""; hideWarning();
+  if (PERSONNEL.length === 0) { tbody.innerHTML = "<tr><td colspan='10' style='text-align:center; padding:20px;'>ابتدا پرسنل را ثبت کنید.</td></tr>"; return; }
+  const morningHours = {}, eveningHours = {}, nightHours = {}, holidayExtra = {}, leaveCount = {};
+  PERSONNEL.forEach(p => { morningHours[p.name] = 0; eveningHours[p.name] = 0; nightHours[p.name] = 0; holidayExtra[p.name] = 0; leaveCount[p.name] = 0; });
+  Object.keys(state.leaves).forEach(person => { if (leaveCount[person] !== undefined) leaveCount[person] = Object.keys(state.leaves[person]).length; });
+  for (let d = 0; d < DAYS; d++) {
+    ZONES.forEach(zone => zone.cols.forEach(shiftType => {
+      const person = state.shifts[d + "|" + zone.name + "|" + shiftType];
+      if (!person) return;
+      const pInfo = PERSONNEL.find(p => p.name === person); if (!pInfo) return;
+      const { holiday } = calcShiftHours(shiftType, d, pInfo.req);
+      holidayExtra[person] += holiday;
+      if (shiftType === "صبح") morningHours[person] += HOURS["صبح"];
+      else if (shiftType === "عصر") eveningHours[person] += HOURS["عصر"];
+      else if (shiftType === "شب") nightHours[person] += HOURS["شب"];
+    }));
+  }
+  const overworked184 = [];
+  PERSONNEL.forEach(p => {
+    const totalShift = morningHours[p.name] + eveningHours[p.name] + nightHours[p.name] + holidayExtra[p.name];
+    const leaveH = Math.round((leaveCount[p.name] * LEAVE_HOURS) * 100) / 100;
+    const total = Math.round((totalShift + leaveH) * 10) / 10;
+    const diff = Math.round((total - p.req) * 10) / 10;
+    if (p.req === 184 && diff > 30) overworked184.push(p.name + " (" + diff + " ساعت)");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="stat-name">${p.name}</td><td style="font-weight:bold;">${p.req}</td><td>${morningHours[p.name]}</td><td>${eveningHours[p.name]}</td><td>${nightHours[p.name]}</td><td style="color:#b45309; font-weight:bold;">${Math.round(holidayExtra[p.name] * 10) / 10}</td><td>${leaveH}</td><td style="font-weight:bold;">${total}</td><td class="${diff > 0 ? 'val-plus' : ''}">${diff > 0 ? diff : '0'}</td><td class="${diff < 0 ? 'val-minus' : ''}">${diff < 0 ? Math.abs(diff) : '0'}</td>`;
+    tbody.appendChild(tr);
+  });
+  if (overworked184.length > 0) showWarning("⚠️ هشدار اضافه کار (۱۸۴ ساعتی‌ها):<br><b>" + overworked184.join(" ، ") + "</b>");
+}
+
+/* ---------- Misc ---------- */
+function onNameChange() {
+  const n = document.getElementById("myName").value;
+  localStorage.setItem("myName", n);
+  renderAll();
+}
+function onZoneChange() {
+  selectedZone = document.getElementById("myZone").value;
+  localStorage.setItem("myZone", selectedZone);
+  renderAll();
+}
+function toggleDarkMode() { document.body.classList.toggle("dark-mode"); }
+function openHelp() { document.getElementById("helpModal").classList.add("active"); }
+function closeHelp() { document.getElementById("helpModal").classList.remove("active"); }
+function openStaff() { renderStaffList(); document.getElementById("staffModal").classList.add("active"); }
+function closeStaff() { document.getElementById("staffModal").classList.remove("active"); }
+
+function showAlert(msg) { const box = document.getElementById("alertBox"); box.textContent = msg; box.style.display = "block"; if (alertTimeout) clearTimeout(alertTimeout); alertTimeout = setTimeout(() => { box.style.display = "none"; }, 4000); window.scrollTo({ top: 0, behavior: "smooth" }); }
+function showWarning(msg) { const box = document.getElementById("warnBox"); box.innerHTML = msg; box.style.display = "block"; if (warnTimeout) clearTimeout(warnTimeout); warnTimeout = setTimeout(() => { box.style.display = "none"; }, 8000); }
+function hideAlert() { document.getElementById("alertBox").style.display = "none"; if (alertTimeout) { clearTimeout(alertTimeout); alertTimeout = null; } }
+function hideWarning() { document.getElementById("warnBox").style.display = "none"; if (warnTimeout) { clearTimeout(warnTimeout); warnTimeout = null; } }
+
+async function forceReset() {
+  if (!isAdmin) { await alertDlg("⛔ این عملیات تنها توسط ادمین امکان‌پذیر است."); return; }
+  const choice = await confirmDlg("تمام داده‌ها پاک شود؟", "پاک‌سازی", true);
+  if (!choice) return;
+  localStorage.clear(); sessionStorage.clear(); location.reload();
+}
+
+/* ---------- Init ---------- */
+function init() {
+  const savedHash = localStorage.getItem("adminPasswordHash");
+  if (savedHash) adminPasswordHash = savedHash;
+  isAdmin = sessionStorage.getItem("isAdmin") === "1";
+
+  const pData = localStorage.getItem("personnelData");
+  if (pData) { try { PERSONNEL = JSON.parse(pData); } catch (e) {} }
+
+  if (!Array.isArray(PERSONNEL) || PERSONNEL.length === 0) {
+    PERSONNEL = JSON.parse(JSON.stringify(DEFAULT_PERSONNEL));
+  }
+  savePersonnel();
+
+  updateNameSelect();
+  const savedZone = localStorage.getItem("myZone");
+  if (savedZone) { document.getElementById("myZone").value = savedZone; selectedZone = savedZone; }
+  const d = localStorage.getItem("shiftData");
+  if (d) { try { state = JSON.parse(d); if (!state.shifts) state.shifts = {}; if (!state.leaves) state.leaves = {}; } catch (e) {} }
+
+  updateAdminUI();
+  renderAll();
+
+  const savedTab = localStorage.getItem("activeTab");
+  if (savedTab && ["shifts","leaves","stats"].includes(savedTab)) {
+    switchTab(savedTab);
+  }
+}
+function save() { localStorage.setItem("shiftData", JSON.stringify(state)); }
+
+/* ---------- Welcome ---------- */
+function showWelcomeMessage() {
+  const overlay = document.createElement('div');
+  overlay.id = 'welcomeOverlay';
+  overlay.style.cssText = `position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 5000; display: flex; justify-content: center; align-items: center; padding: 12px; animation: welcomeFadeIn 0.4s ease-out;`;
+  overlay.innerHTML = `
+    <div style="background: #ffffff; color: #1e293b; border-radius: 16px; max-width: 480px; width: 100%; padding: 22px 18px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); text-align: right; direction: rtl; animation: welcomeSlideUp 0.5s ease-out;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px solid #e2e8f0;">
+        <div style="width: 42px; height: 42px; flex-shrink: 0; background: #1e293b; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;">🗓️</div>
+        <div>
+          <h2 style="font-size: 15px; margin: 0 0 3px; font-weight: 900; color: #1e293b;">سامانه مدیریت برنامه شیفت</h2>
+          <p style="font-size: 11px; color: #64748b; margin: 0;">خوابگاه‌های دانشجویی — آبان ماه ۱۴۰۵</p>
+        </div>
+      </div>
+      <p style="font-size: 12.5px; color: #334155; line-height: 1.8; margin: 0 0 14px; text-align: justify;">کاربر گرامی، به سامانه مدیریت برنامه شیفت خوش آمدید. لطفاً پیش از ثبت اطلاعات، دستورالعمل زیر را مطالعه فرمایید.</p>
+      <div style="background: #f8fafc; padding: 14px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #e2e8f0; border-right: 4px solid #3b82f6;">
+        <h3 style="font-size: 12.5px; font-weight: 800; color: #1e293b; margin: 0 0 10px;">📋 دستورالعمل:</h3>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start;"><span style="background: #1e293b; color: white; min-width: 20px; height: 20px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; margin-top: 1px;">۱</span><span style="font-size: 11.5px; line-height: 1.6; color: #334155;">از بخش <b>«نام من»</b> در نوار بالا، نام خود را انتخاب کنید.</span></div>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start;"><span style="background: #1e293b; color: white; min-width: 20px; height: 20px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; margin-top: 1px;">۲</span><span style="font-size: 11.5px; line-height: 1.6; color: #334155;">شیفت‌های خود را در تب «برنامه شیفت» ثبت کنید. ثبت شیفت برای دیگران امکان‌پذیر نیست.</span></div>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start;"><span style="background: #1e293b; color: white; min-width: 20px; height: 20px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; margin-top: 1px;">۳</span><span style="font-size: 11.5px; line-height: 1.6; color: #334155;">برای ثبت مرخصی، از تب «جدول مرخصی» استفاده کنید.</span></div>
+        <div style="display: flex; gap: 8px; align-items: flex-start;"><span style="background: #1e293b; color: white; min-width: 20px; height: 20px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; margin-top: 1px;">۴</span><span style="font-size: 11.5px; line-height: 1.6; color: #334155;">در پایان، فایل اکسل را با دکمه <b>«📊»</b> دریافت کنید.</span></div>
+      </div>
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 11px; color: #92400e; line-height: 1.6;"><b>🔔 توجه:</b> مسئولیت صحت اطلاعات ثبت‌شده بر عهده کاربر است. لطفاً پیش از ثبت نهایی دقت فرمایید.</div>
+      <button id="welcomeBtn" style="width: 100%; padding: 12px; border: none; border-radius: 8px; background: #1e293b; color: white; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;">ورود به سامانه</button>
+      <p style="font-size: 10px; color: #94a3b8; margin-top: 10px; margin-bottom: 0; text-align: center; line-height: 1.5;">اداره امور خوابگاه‌ها — نسخه ۱۴۰۵</p>
+    </div>
+  `;
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `@keyframes welcomeFadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes welcomeSlideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`;
+  document.head.appendChild(styleEl);
+  document.body.appendChild(overlay);
+  const closeBtn = document.getElementById('welcomeBtn');
+  closeBtn.addEventListener('click', () => {
+    overlay.style.animation = 'welcomeFadeIn 0.3s ease-out reverse';
+    setTimeout(() => { overlay.remove(); }, 300);
+  });
+}
+
+window.onload = function() {
+  init();
+  setTimeout(showWelcomeMessage, 300);
+};
+</script>
+</body>
+</html>
