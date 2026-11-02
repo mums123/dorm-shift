@@ -108,7 +108,8 @@ body.dark-mode .info-banner{background:linear-gradient(135deg,#1e3a8a,#1e40af);c
 </style>
 </head>
 <body>
-  <div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
+
+<div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
   <div style="text-align:center;">
     <div style="font-size:48px;margin-bottom:16px;">⏳</div>
     <div style="font-size:16px;font-weight:700;color:#64748b;">در حال اتصال...</div>
@@ -194,36 +195,13 @@ const ZONES=[
   {name:"نجمه خاتون",cols:["صبح","عصر","شب"],cls:"bg-z4"},
   {name:"گلشن",cols:["صبح","عصر"],cls:"bg-z5"}
 ];
-
-const emailMap = {
-  "مدیر سامانه": "admin@dorm.local",
-  "ادمین تست": "testadmin@dorm.local",
-  "خانم موسوی": "mousavi@dorm.local",
-  "خانم قابل": "ghabel@dorm.local",
-  "خانم پیغمبری": "peighambari@dorm.local",
-  "خانم رضایی": "rezaei@dorm.local",
-  "خانم شاهسون": "shahsoon@dorm.local",
-  "خانم غلامی": "gholami@dorm.local",
-  "خانم هنرمند": "honarmand@dorm.local",
-  "خانم بابایی": "babaei@dorm.local",
-  "خانم یوسفی": "yousefi@dorm.local",
-  "خانم یاقوتی": "yaghouti@dorm.local",
-  "خانم دافعی": "dafei@dorm.local",
-  "خانم رنجبر": "ranjbar@dorm.local",
-  "خانم شکیب": "shakib@dorm.local",
-  "خانم براتی": "barati@dorm.local",
-  "خانم رحمانی": "rahmani@dorm.local",
-  "خانم چراغ چشم": "cheraghcheshm@dorm.local",
-  "خانم امیری": "amiri@dorm.local",
-  "خانم حشمتی": "heshmati@dorm.local"
-};
-
 function getDayInfo(i){const d=new Date(BASE_DATE);d.setDate(BASE_DATE.getDate()+i);return{weekday:WEEKDAYS[d.getDay()],isFriday:d.getDay()===5};}
 function showAlert(m){const b=document.getElementById("alertBox");b.textContent=m;b.style.display="block";setTimeout(()=>b.style.display="none",4000);}
 function showWarning(m){const b=document.getElementById("warnBox");b.innerHTML=m;b.style.display="block";setTimeout(()=>b.style.display="none",8000);}
 function closeModal(id){document.getElementById(id).classList.remove("active");}
 function toggleDarkMode(){document.body.classList.toggle("dark-mode");}
 function openHelp(){showAlert("راهنما: برای ثبت شیفت، روی خانه‌ها کلیک کنید.");}
+function openExcel(){showAlert("در حال آماده‌سازی...");}
 function openStaff(){renderStaffList();document.getElementById("staffModal").classList.add("active");}
 function openLogs(){loadLogs();document.getElementById("logsModal").classList.add("active");}
 function openRecovery(){document.getElementById("recoveryModal").classList.add("active");}
@@ -251,10 +229,7 @@ async function doLogin(){
   const name=document.getElementById("loginName").value,pass=document.getElementById("loginPassword").value,err=document.getElementById("loginError");
   if(!name||!pass){err.textContent="نام و رمز را وارد کنید";return;}
   err.textContent="";
-  
-  const email = emailMap[name];
-  if(!email){err.textContent="کاربر در سیستم یافت نشد.";return;}
-
+  let email=name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(name).replace(/%/g,'').toLowerCase()}@dorm.local`;
   const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error){err.textContent="رمز یا نام اشتباه است";return;}
   const{data:p}=await sb.from("profiles").select("*").eq("id",data.user.id).single();
@@ -271,9 +246,7 @@ async function loadAll(){
   (l||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per){if(!state.leaves[per.name])state.leaves[per.name]={};state.leaves[per.name][String(x.day)]=true;}});
 }
 function renderAll(){renderTable();renderLeaves();renderStats();}
-</script>
-function renderTable(){
-  const visiblePersonnel = PERSONNEL.filter(p => !p.is_admin);
+  function renderTable(){
   const zr=document.getElementById("zoneHeaderRow");Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove();});
   const sh=document.getElementById("subHeader");sh.innerHTML="";
   ZONES.forEach(z=>{
@@ -291,7 +264,7 @@ function renderTable(){
       const empty=document.createElement("option");empty.value="";empty.textContent="—";sel.appendChild(empty);
       
       if(isAdmin){
-        visiblePersonnel.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);});
+        PERSONNEL.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);});
         sel.value=owner;sel.addEventListener("change",()=>onShiftChange(sel));
       }else{
         if(owner&&owner!==currentUser.name){
@@ -377,7 +350,7 @@ async function onShiftChange(sel){
 
 function renderLeaves(){
   const tb=document.getElementById("leaveTableBody");tb.innerHTML="";
-  const list=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+  const list=isAdmin?PERSONNEL:PERSONNEL.filter(p=>p.name===currentUser.name);
   if(list.length===0){tb.innerHTML="<tr><td colspan='6' style='text-align:center;'>ردیفی نیست</td></tr>";return;}
 
   list.forEach(p=>{
@@ -421,14 +394,13 @@ async function onLeaveChange(person,sel,td){
   if(getDayInfo(dayIdx).isFriday){await alertDlg("⛔ جمعه مجاز نیست.");sel.value="";return;}
   if(findPersonShiftOnDay(person,dayIdx).length>0){await alertDlg("⛔ در این روز شیفت دارید.");sel.value="";return;}
 
-  const { count, error: countErr } = await sb.from("leaves").select("*", { count: 'exact', head: true }).eq("day", dayIdx);
-  if (countErr) { await alertDlg("⛔ خطا در بررسی ظرفیت: " + countErr.message); sel.value=""; return; }
-  if (count >= 2) { await alertDlg("⛔ ظرفیت مرخصی این روز پر است."); sel.value=""; return; }
+  let capacity=0;Object.keys(state.leaves).forEach(o=>{if(o===person)return;if(Object.prototype.hasOwnProperty.call(state.leaves[o],String(dayIdx)))capacity++;});
+  if(capacity>=2){await alertDlg("⛔ ظرفیت این روز پر است.");sel.value="";return;}
 
   try{
     const{error}=await sb.from("leaves").insert({day:dayIdx,user_id:pObj.id});
     if(error){
-      if(error.message.includes("LEAVE_CAPACITY_FULL"))await alertDlg("⛔ ظرفیت پر شد (هم‌زمان).");
+      if(error.message.includes("LEAVE_CAPACITY_FULL"))await alertDlg("⛔ ظرفیت پر شد (همزمان).");
       else if(error.code==="23505")await alertDlg("⛔ قبلاً ثبت شده.");
       else await alertDlg("⛔ خطا: "+error.message);
       sel.value="";return;
@@ -438,7 +410,8 @@ async function onLeaveChange(person,sel,td){
     renderStats();showAlert("✅ مرخصی ثبت شد.");
   }catch(e){await alertDlg("⛔ خطا: "+e.message);sel.value="";}
 }
-    function calcShiftHours(type,dayIdx,req){
+
+function calcShiftHours(type,dayIdx,req){
   const base=HOURS[type],is184=req===184,info=getDayInfo(dayIdx),nxt=getDayInfo(dayIdx+1);
   if(type==="صبح"||type==="عصر"){if(info.isFriday)return{total:base*1.5,holiday:base*0.5};return{total:base,holiday:0};}
   let h=0;if(is184){if(nxt.isFriday)h=7.5;else if(info.isFriday)h=4.5;}else{if(info.isFriday)h=12;}
@@ -447,7 +420,7 @@ async function onLeaveChange(person,sel,td){
 
 function renderStats(){
   const tb=document.getElementById("statsBody");tb.innerHTML="";
-  const list=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+  const list=isAdmin?PERSONNEL:PERSONNEL.filter(p=>p.name===currentUser.name);
   if(list.length===0){tb.innerHTML="<tr><td colspan='10' style='text-align:center;'>ردیفی نیست</td></tr>";return;}
   const m={},e={},n={},h={},lc={};
   PERSONNEL.forEach(p=>{m[p.name]=0;e[p.name]=0;n[p.name]=0;h[p.name]=0;lc[p.name]=0;});
@@ -470,11 +443,11 @@ function renderStats(){
 
 function renderStaffList(){
   const l=document.getElementById("staffList");l.innerHTML="";
-  PERSONNEL.filter(p=>!p.is_admin).forEach((p,i)=>{
+  PERSONNEL.forEach((p,i)=>{
     const d=document.createElement("div");d.className="staff-item";
-    d.innerHTML=`<span class="staff-info">${p.name}</span>
-    <input type="number" class="req-input" value="${p.req}" data-idx="${PERSONNEL.indexOf(p)}">
-    <button class="btn-del" data-del="${PERSONNEL.indexOf(p)}">حذف</button>`;
+    d.innerHTML=`<span class="staff-info">${p.name}${p.is_admin?' 👑':''}</span>
+    <input type="number" class="req-input" value="${p.req}" data-idx="${i}" ${p.is_admin?'disabled':''}>
+    ${!p.is_admin?`<button class="btn-del" data-del="${i}">حذف</button>`:''}`;
     l.appendChild(d);
   });
   l.querySelectorAll("input.req-input").forEach(inp=>inp.addEventListener("change",async()=>{
@@ -489,56 +462,16 @@ function renderStaffList(){
 }
 
 async function addStaff(){
-  await alertDlg("⚠️ افزودن کاربر جدید از طریق پنل Supabase (بخش Authentication) انجام می‌شود.");
+  const name=document.getElementById("newStaffName").value.trim(),req=parseFloat(document.getElementById("newStaffReq").value);
+  if(!name||isNaN(req))return alertDlg("نام و موظفی معتبر نیست.");
+  await alertDlg("⚠️ برای افزودن پرسنل جدید، با ادمین اصلی (شما) از طریق پنل سوپابیس تماس بگیرید.\nدلیل: افزودن کاربر جدید نیاز به دسترسی ادمین دارد.\n\nلطفاً کاربر جدید را در بخش Authentication > Users بسازید و سپس پروفایل او را در جدول profiles وارد کنید.");
 }
 
-function switchTab(n){
-  ["shifts","leaves","stats"].forEach(t=>{document.getElementById("tabBtn"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");document.getElementById("panel"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");});
-  document.getElementById("tabBtn"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
-  document.getElementById("panel"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
-}
-      async function loadLogs(){
+async function loadLogs(){
+  const{data}=await sb.from("audit_logs").select("*,profiles(name)").order("created_at",{ascending:false}).limit(50);
   const b=document.getElementById("logsBody");
-  b.innerHTML="<div style='text-align:center;padding:20px;'><div class='loader'></div></div>";
-  try {
-    const{data,error}=await sb.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(100);
-    if(error) throw error;
-    if(!data||data.length===0){b.innerHTML="<p style='text-align:center;color:#64748b;padding:30px;'>هیچ گزارشی یافت نشد.</p>";return;}
-    
-    b.innerHTML = "<div style='display:flex;flex-direction:column;gap:8px;'>" + data.map(l => {
-      const name = PERSONNEL.find(p => p.id === l.user_id)?.name || 'نامشخص';
-      const date = new Date(l.created_at).toLocaleString('fa-IR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      
-      let icon = "⚙️", color = "#64748b", bg = "#f1f5f9", title = l.action;
-      
-      if (l.action === 'ثبت شیفت') { icon = "✅"; color = "#15803d"; bg = "#dcfce7"; }
-      else if (l.action === 'حذف شیفت') { icon = "🗑️"; color = "#991b1b"; bg = "#fee2e2"; }
-      else if (l.action === 'ثبت مرخصی') { icon = "🏖️"; color = "#c2410c"; bg = "#ffedd5"; }
-      else if (l.action === 'حذف مرخصی') { icon = "❌"; color = "#991b1b"; bg = "#fee2e2"; }
-
-      let details = "";
-      if (l.details) {
-        if (l.details.zone) {
-          details = `<span style="font-size:11px;background:rgba(0,0,0,0.05);padding:2px 6px;border-radius:4px;margin-right:4px;">${l.details.zone}</span>
-                     <span style="font-size:11px;background:rgba(0,0,0,0.05);padding:2px 6px;border-radius:4px;margin-right:4px;">${l.details.type}</span>
-                     <span style="font-size:11px;background:rgba(0,0,0,0.05);padding:2px 6px;border-radius:4px;">روز ${l.details.day + 1}</span>`;
-        } else if (l.details.day !== undefined) {
-          details = `<span style="font-size:11px;background:rgba(0,0,0,0.05);padding:2px 6px;border-radius:4px;">روز ${l.details.day + 1} ماه</span>`;
-        }
-      }
-
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;border-right:4px solid ${color};">
-        <div style="width:36px;height:36px;flex-shrink:0;background:${bg};color:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;">${icon}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:800;color:var(--text-main);margin-bottom:2px;">${title} <span style="font-weight:400;color:var(--text-muted);font-size:11px;">توسط ${name}</span></div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">${details}</div>
-        </div>
-        <div style="font-size:10px;color:var(--text-muted);white-space:nowrap;text-align:left;direction:ltr;">${date}</div>
-      </div>`;
-    }).join('') + "</div>";
-  } catch (e) {
-    b.innerHTML="<p style='color:red;text-align:center;padding:20px;'>خطا: "+e.message+"</p>";
-  }
+  if(!data||data.length===0){b.innerHTML="<p style='text-align:center;color:#64748b;'>گزارشی ثبت نشده است.</p>";return;}
+  b.innerHTML=data.map(l=>`<div style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;">👤 <b>${l.profiles?.name||'ناشناس'}</b> - ${l.action} (${new Date(l.created_at).toLocaleString('fa-IR')})</div>`).join('');
 }
 
 async function doRecovery(){
@@ -548,8 +481,7 @@ async function doRecovery(){
   if(!newPw||newPw.length<6){err.textContent="رمز باید حداقل ۶ کاراکتر باشد.";return;}
   err.textContent="در حال پردازش...";
   try{
-    const email=emailMap[name];
-    if(!email)throw new Error("نام کاربری یافت نشد.");
+    const email=name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(name).replace(/%/g,'').toLowerCase()}@dorm.local`;
     const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
     if(error)throw error;
     closeModal("recoveryModal");await alertDlg("✅ لینک بازیابی به ایمیل شما ارسال شد.");
@@ -561,8 +493,7 @@ async function openChangePassword(){
   if(!oldPw)return;
   const newPw=await promptDlg("رمز جدید (حداقل ۶ کاراکتر):","");
   if(!newPw||newPw.length<6)return alertDlg("رمز کوتاه است.");
-  const email=emailMap[currentUser.name];
-  if(!email)return alertDlg("خطا: ایمیل کاربر یافت نشد.");
+  const email=currentUser.name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(currentUser.name).replace(/%/g,'').toLowerCase()}@dorm.local`;
   const{error:err1}=await sb.auth.signInWithPassword({email,password:oldPw});
   if(err1)return alertDlg("رمز فعلی اشتباه است.");
   const{error:err2}=await sb.auth.updateUser({password:newPw});
@@ -570,34 +501,10 @@ async function openChangePassword(){
   alertDlg("✅ رمز تغییر کرد.");
 }
 
-function openExcel() {
-  if (typeof XLSX === "undefined") { alertDlg("کتابخانه اکسل بارگذاری نشد."); return; }
-  if (PERSONNEL.length === 0) { alertDlg("پرسنل خالی است."); return; }
-  const wb = XLSX.utils.book_new();
-  wb.Workbook = { Views: [{ RTL: true }] };
-  const ST = { font: { name: "Vazirmatn", sz: 11, color: { rgb: "1E293B" } }, fontWhite: { name: "Vazirmatn", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, border: { top: { style: "thin", color: { rgb: "CBD5E1" } }, bottom: { style: "thin", color: { rgb: "CBD5E1" } }, left: { style: "thin", color: { rgb: "CBD5E1" } }, right: { style: "thin", color: { rgb: "CBD5E1" } } }, alignCenter: { horizontal: "center", vertical: "center", wrapText: true, readingOrder: 2 } };
-  function styleCell(ws,r,c,st){const ref=XLSX.utils.encode_cell({r,c});if(!ws[ref])ws[ref]={v:"",t:"s"};ws[ref].s=st;}
-  function applyRange(ws,r1,c1,r2,c2,st){for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)styleCell(ws,r,c,st);}
-  
-  const sheet1=[["روز","تاریخ"]];ZONES.forEach(z=>z.cols.forEach(()=>sheet1[0].push(z.name)));
-  const row2=["",""];ZONES.forEach(z=>z.cols.forEach(c=>row2.push(c)));sheet1.push(row2);
-  for(let d=0;d<DAYS;d++){const info=getDayInfo(d);const row=[info.weekday,(d+1)+" "+MONTH];ZONES.forEach(zone=>zone.cols.forEach(t=>{const p=state.shifts[`${d}|${zone.name}|${t}`]||"";if(!isAdmin&&p&&p!==currentUser.name)row.push("🚫");else row.push(p);}));sheet1.push(row);}
-  const ws1=XLSX.utils.aoa_to_sheet(sheet1);ws1["!cols"]=[{wch:12},{wch:14}];for(let i=0;i<15;i++)ws1["!cols"].push({wch:16});
-  applyRange(ws1,0,0,DAYS+1,1,{font:ST.fontWhite,fill:{fgColor:{rgb:"334155"}},border:ST.border,alignment:ST.alignCenter});
-  XLSX.utils.book_append_sheet(wb,ws1,"برنامه شیفت");
-  
-  const m={},e={},n={},h={},lc={};PERSONNEL.forEach(p=>{m[p.name]=0;e[p.name]=0;n[p.name]=0;h[p.name]=0;lc[p.name]=0;});
-  Object.keys(state.leaves).forEach(per=>{if(lc[per]!==undefined)lc[per]=Object.keys(state.leaves[per]).length;});
-  for(let d=0;d<DAYS;d++){ZONES.forEach(z=>z.cols.forEach(t=>{const person=state.shifts[`${d}|${z.name}|${t}`];if(!person)return;const p=PERSONNEL.find(x=>x.name===person);if(!p)return;const{holiday}=calcShiftHours(t,d,p.req);h[person]+=holiday;if(t==="صبح")m[person]+=HOURS[t];else if(t==="عصر")e[person]+=HOURS[t];else n[person]+=HOURS[t];}));}
-  
-  const sheet2=[["نام","موظفی","صبح","عصر","شب","تعطیلات","مرخصی","کارکرد","اضافه","کسر"]];
-  const statList=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
-  statList.forEach(p=>{const ts=m[p.name]+e[p.name]+n[p.name]+h[p.name],lh=Math.round(lc[p.name]*LEAVE_HOURS*100)/100,total=Math.round((ts+lh)*10)/10,diff=Math.round((total-p.req)*10)/10;sheet2.push([p.name,p.req,m[p.name],e[p.name],n[p.name],Math.round(h[p.name]*10)/10,lh,total,diff>0?diff:0,diff<0?Math.abs(diff):0]);});
-  const ws2=XLSX.utils.aoa_to_sheet(sheet2);ws2["!cols"]=[{wch:20},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:10}];
-  applyRange(ws2,0,0,0,9,{font:ST.fontWhite,fill:{fgColor:{rgb:"0F172A"}},border:ST.border,alignment:ST.alignCenter});
-  XLSX.utils.book_append_sheet(wb,ws2,"آمار کارکرد");
-  
-  const wbout=XLSX.write(wb,{bookType:"xlsx",type:"array"});const blob=new Blob([wbout],{type:"application/octet-stream"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="گزارش-شیفت.xlsx";a.click();URL.revokeObjectURL(a.href);showAlert("✅ فایل اکسل دانلود شد.");
+function switchTab(n){
+  ["shifts","leaves","stats"].forEach(t=>{document.getElementById("tabBtn"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");document.getElementById("panel"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");});
+  document.getElementById("tabBtn"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
+  document.getElementById("panel"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
 }
 
 window.addEventListener("load",init);
