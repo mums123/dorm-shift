@@ -251,273 +251,7 @@ async function loadAll(){
   (l||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per){if(!state.leaves[per.name])state.leaves[per.name]={};state.leaves[per.name][String(x.day)]=true;}});
 }
 function renderAll(){renderTable();renderLeaves();renderStats();}
-
-function renderTable(){
-  const visiblePersonnel = PERSONNEL.filter(p => !p.is_admin);
-  const zr=document.getElementById("zoneHeaderRow");Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove();});
-  const sh=document.getElementById("subHeader");sh.innerHTML="";
-  ZONES.forEach(z=>{
-    const th=document.createElement("th");th.className=z.cls;th.colSpan=z.cols.length;th.textContent=z.name;zr.appendChild(th);
-    z.cols.forEach(c=>{const s=document.createElement("th");s.className=z.cls;s.textContent=c;sh.appendChild(s);});
-  });
-  const tb=document.getElementById("tableBody");tb.innerHTML="";
-  for(let d=0;d<DAYS;d++){
-    const info=getDayInfo(d),tr=document.createElement("tr");if(info.isFriday)tr.classList.add("is-friday");
-    tr.innerHTML=`<td class="day-cell">${info.weekday}</td><td class="date-cell">
-    <!DOCTYPE html>
-<html dir="rtl" lang="fa">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>برنامه شیفت خوابگاه‌ها — آبان ۱۴۰۵</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-<style>
-:root{--bg-body:#f1f5f9;--bg-card:#fff;--bg-header-grad:linear-gradient(135deg,#1e293b,#0f172a);--text-main:#0f172a;--text-muted:#64748b;--border-color:#e2e8f0;--th-bg:#f8fafc;--input-bg:#fff;--primary:#3b82f6;--danger:#ef4444;--warn:#f59e0b;--ok:#10b981;--shadow-md:0 4px 12px rgba(15,23,42,.08);--shadow-lg:0 10px 30px rgba(15,23,42,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--transition:all .2s}
-body.dark-mode{--bg-body:#0f172a;--bg-card:#1e293b;--bg-header-grad:linear-gradient(135deg,#1e293b,#020617);--text-main:#f1f5f9;--text-muted:#94a3b8;--border-color:#334155;--th-bg:#0f172a;--input-bg:#0f172a;--primary:#60a5fa}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',Tahoma,sans-serif}
-body{background:var(--bg-body);color:var(--text-main);padding:10px;min-height:100vh;line-height:1.6;font-size:13px;transition:background .3s,color .3s}
-.container{max-width:1400px;margin:0 auto}
-.app-header{background:var(--bg-header-grad);color:#fff;padding:14px 18px;border-radius:var(--radius-lg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;box-shadow:var(--shadow-lg)}
-.app-header h1{font-size:16px;font-weight:900;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.admin-badge{display:none;font-size:11px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;padding:4px 10px;border-radius:20px}
-body.is-admin .admin-badge{display:inline-flex}
-body.is-admin .admin-only{display:inline-flex!important}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.tool-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;transition:var(--transition)}
-.tool-btn:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
-.tool-btn.danger{background:rgba(239,68,68,.3)}
-.tool-btn.admin-only{display:none}
-.user-info{background:rgba(255,255,255,.1);padding:6px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
-.alert-box,.warn-box{display:none;padding:14px 18px;border-radius:var(--radius-md);margin-bottom:14px;font-size:13px;font-weight:700;box-shadow:var(--shadow-md);position:sticky;top:12px;z-index:100;border-right:5px solid}
-.alert-box{background:#fef2f2;color:#991b1b;border-right-color:var(--danger)}
-.warn-box{background:#fffbeb;color:#92400e;border-right-color:var(--warn)}
-body.dark-mode .alert-box{background:#450a0a;color:#fecaca}
-body.dark-mode .warn-box{background:#451a03;color:#fde68a}
-.tabs-nav{display:flex;gap:6px;margin-bottom:16px;background:var(--bg-card);padding:6px;border-radius:var(--radius-md);border:1px solid var(--border-color);overflow-x:auto}
-.tab-btn{flex:1;min-width:120px;padding:11px 14px;border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:800;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);white-space:nowrap}
-.tab-btn.active{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
-.tab-panel{display:none}.tab-panel.active{display:block}
-.table-container{background:var(--bg-card);border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border-color);overflow-x:auto;margin-bottom:18px}
-table.main-table{width:100%;border-collapse:separate;border-spacing:0;text-align:center;font-size:12px}
-th,td{border-bottom:1px solid var(--border-color);border-left:1px solid var(--border-color);padding:8px 4px}
-th:last-child,td:last-child{border-left:none}
-th{font-weight:900;font-size:12px;background:var(--th-bg);position:sticky;top:0;z-index:2}
-thead tr:nth-child(2) th{top:36px}
-.day-cell{font-weight:900;width:70px;white-space:nowrap}
-.date-cell{font-size:11px;width:70px;color:var(--text-muted);white-space:nowrap}
-tr.is-friday td{background:linear-gradient(90deg,#fef3c7,#fffbeb)}
-body.dark-mode tr.is-friday td{background:linear-gradient(90deg,#422006,#1e293b)}
-tr.is-friday .day-cell,tr.is-friday .date-cell{color:#dc2626;font-weight:900}
-.bg-z1{background:#e0f2fe!important;color:#0369a1!important}
-.bg-z2{background:#dcfce7!important;color:#15803d!important}
-.bg-z3{background:#ffedd5!important;color:#c2410c!important}
-.bg-z4{background:#fef9c3!important;color:#a16207!important}
-.bg-z5{background:#f3e8ff!important;color:#6b21a8!important}
-select.s-cell{width:100%;height:36px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:11px;font-weight:700;text-align:center;text-align-last:center;outline:none;cursor:pointer;appearance:none;border-radius:6px;padding:0 4px}
-select.s-cell.mine{background:linear-gradient(135deg,#bbf7d0,#86efac)!important;color:#166534!important;border-color:#22c55e}
-select.s-cell.locked{opacity:.5;cursor:not-allowed;background:#f1f5f9!important}
-select.s-cell.taken{color:#dc2626;font-weight:900}
-.section-box{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;margin-top:18px;border:1px solid var(--border-color);box-shadow:var(--shadow-md)}
-.section-box h3{font-size:14px;margin-bottom:14px;color:var(--primary);border-bottom:2px solid var(--border-color);padding-bottom:10px;font-weight:900}
-.leave-table-wrapper,.stats-table-wrapper{overflow-x:auto;border-radius:var(--radius-sm)}
-table.leave-table,table.stats-table{width:100%;border-collapse:separate;border-spacing:0;text-align:center;font-size:11px;min-width:500px}
-table.leave-table th,table.stats-table th{background:var(--th-bg);padding:10px 6px;border-bottom:2px solid var(--border-color);font-size:11px;font-weight:900}
-table.stats-table th{background:var(--bg-header-grad);color:#fff;position:sticky;top:0}
-table.leave-table td,table.stats-table td{padding:6px;border-bottom:1px solid var(--border-color)}
-.leave-name-cell,.stat-name{font-weight:900;text-align:right;padding-right:12px!important;color:var(--primary);white-space:nowrap;font-size:12px}
-.leave-select{width:100%;height:34px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:11px;text-align:center;outline:none;background:var(--bg-body);color:var(--text-main);padding:0 4px;cursor:pointer}
-.leave-select.locked{opacity:.6;cursor:not-allowed}
-.val-plus{color:#059669;font-weight:900;background:#d1fae5;border-radius:4px}
-.val-minus{color:#dc2626;font-weight:900;background:#fee2e2;border-radius:4px}
-body.dark-mode .val-plus{background:#064e3b;color:#a7f3d0}
-body.dark-mode .val-minus{background:#7f1d1d;color:#fecaca}
-.modal-overlay,.dialog-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;justify-content:center;align-items:center;padding:15px;backdrop-filter:blur(8px)}
-.modal-overlay.active,.dialog-overlay.active{display:flex}
-.dialog-overlay{z-index:2000}
-.modal-content{background:var(--bg-card);color:var(--text-main);width:100%;max-width:600px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
-.modal-header{background:var(--bg-header-grad);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h2{font-size:15px;font-weight:900}
-.modal-close{background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.modal-body{padding:20px;overflow-y:auto;font-size:13px;line-height:1.8}
-.staff-list{margin-top:15px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
-.staff-item{display:flex;justify-content:space-between;align-items:center;background:var(--th-bg);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-color);gap:8px;flex-wrap:wrap}
-.staff-item .staff-info{flex:1;min-width:100px;font-size:13px;font-weight:700}
-.staff-item input.req-input{width:70px;padding:6px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:12px;background:var(--input-bg);color:var(--text-main);text-align:center;font-weight:700}
-.btn-add-staff{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}
-.btn-add-staff input{flex:1;min-width:100px;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--input-bg);color:var(--text-main);outline:none}
-.btn-add-staff button{padding:10px 18px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-weight:700;font-size:13px}
-.btn-del{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px}
-body.dark-mode .btn-del{background:#7f1d1d;color:#fecaca;border-color:#dc2626}
-.btn-secondary{background:var(--th-bg);color:var(--text-main);border:1px solid var(--border-color);padding:10px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-weight:700;font-size:12px}
-.info-banner{background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#1e40af;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:12px;border-right:4px solid var(--primary);line-height:1.7;font-weight:600}
-body.dark-mode .info-banner{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#bfdbfe}
-.dialog-box{background:var(--bg-card);color:var(--text-main);border-radius:var(--radius-md);max-width:420px;width:100%;padding:24px;box-shadow:var(--shadow-lg)}
-.dialog-box h3{font-size:16px;margin-bottom:10px;font-weight:900}
-.dialog-box p{font-size:13px;margin-bottom:16px;color:var(--text-muted);white-space:pre-line;line-height:1.8}
-.dialog-box input{width:100%;padding:11px 14px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;margin-bottom:14px;background:var(--input-bg);color:var(--text-main);outline:none}
-.dialog-actions{display:flex;gap:10px;justify-content:flex-start}
-.dialog-actions button{padding:10px 20px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px}
-.btn-primary{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
-.btn-cancel{background:var(--th-bg);color:var(--text-main);border:1px solid var(--border-color)}
-.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
-.login-box{max-width:420px;margin:40px auto;background:var(--bg-card);padding:28px 24px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);border:1px solid var(--border-color)}
-.login-box h2{font-size:18px;text-align:center;margin-bottom:20px;color:var(--primary)}
-.login-box label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;margin-top:14px}
-.login-box select,.login-box input{width:100%;padding:11px 14px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--input-bg);color:var(--text-main);outline:none}
-.login-box button{width:100%;padding:12px;margin-top:20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
-.login-box .forgot-link{display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--primary);cursor:pointer;text-decoration:underline}
-.login-box .error-msg{color:var(--danger);font-size:12px;font-weight:700;margin-top:10px;text-align:center;min-height:18px}
-@media(min-width:768px){body{padding:20px;font-size:14px}.app-header h1{font-size:19px}.tool-btn{width:42px;height:42px}}
-@media print{.app-header,.tool-btn,.modal-overlay,.dialog-overlay,.tabs-nav,.controls{display:none!important}.tab-panel{display:block!important}body{background:#fff;color:#000}}
-</style>
-</head>
-<body>
-
-<div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
-  <div style="text-align:center;">
-    <div style="font-size:48px;margin-bottom:16px;">⏳</div>
-    <div style="font-size:16px;font-weight:700;color:#64748b;">در حال اتصال...</div>
-  </div>
-</div>
-
-<div id="loginScreen" style="display:none;">
-  <div class="login-box">
-    <h2>🔐 ورود به سامانه شیفت</h2>
-    <label>👤 نام کاربری:</label>
-    <select id="loginName"><option value="">در حال بارگذاری...</option></select>
-    <label>🔑 رمز عبور:</label>
-    <input type="password" id="loginPassword" placeholder="رمز عبور" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()" id="loginBtn">ورود</button>
-    <span class="forgot-link" onclick="openRecovery()">🔁 رمز را فراموش کرده‌اید؟</span>
-    <div class="error-msg" id="loginError"></div>
-  </div>
-</div>
-
-<div class="container" id="mainApp" style="display:none;">
-  <div class="app-header">
-    <h1>📅 برنامه شیفت خوابگاه‌ها <span class="admin-badge">👑 ادمین</span></h1>
-    <div class="controls">
-      <span class="user-info" id="userInfoBox">👤 <span id="currentUserName"></span></span>
-      <button class="tool-btn" onclick="openExcel()" title="خروجی اکسل">📊</button>
-      <button class="tool-btn admin-only" onclick="openStaff()" title="پرسنل">👥</button>
-      <button class="tool-btn admin-only" onclick="openLogs()" title="گزارش تغییرات">📝</button>
-      <button class="tool-btn" onclick="toggleDarkMode()" title="حالت شب">🌙</button>
-      <button class="tool-btn" onclick="openHelp()" title="راهنما">❓</button>
-      <button class="tool-btn" onclick="openChangePassword()" title="تغییر رمز">🔐</button>
-      <button class="tool-btn" onclick="doLogout()" title="خروج">🚪</button>
-    </div>
-  </div>
-  <div class="alert-box" id="alertBox"></div>
-  <div class="warn-box" id="warnBox"></div>
-  <div class="tabs-nav">
-    <button class="tab-btn active" id="tabBtnShifts" onclick="switchTab('shifts')">📅 شیفت</button>
-    <button class="tab-btn" id="tabBtnLeaves" onclick="switchTab('leaves')">🏖️ مرخصی</button>
-    <button class="tab-btn" id="tabBtnStats" onclick="switchTab('stats')">📊 آمار</button>
-  </div>
-  <div class="tab-panel active" id="panelShifts">
-    <div class="table-container">
-      <table class="main-table">
-        <thead><tr id="zoneHeaderRow"><th rowspan="2" class="day-cell">روز</th><th rowspan="2" class="date-cell">تاریخ</th></tr><tr id="subHeader"></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="tab-panel" id="panelLeaves">
-    <div class="section-box">
-      <h3>🏖️ ثبت مرخصی</h3>
-      <div class="leave-table-wrapper">
-        <table class="leave-table"><thead><tr><th>نام</th><th>مرخصی ۱</th><th>مرخصی ۲</th><th>مرخصی ۳</th><th>مرخصی ۴</th><th>مرخصی ۵</th></tr></thead><tbody id="leaveTableBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-  <div class="tab-panel" id="panelStats">
-    <div class="section-box">
-      <h3>📊 آمار</h3>
-      <div class="stats-table-wrapper">
-        <table class="stats-table"><thead><tr><th>نام</th><th>موظفی</th><th>صبح</th><th>عصر</th><th>شب</th><th>تعطیلات</th><th>مرخصی</th><th>کارکرد</th><th>اضافه</th><th>کسر</th></tr></thead><tbody id="statsBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="staffModal"><div class="modal-content"><div class="modal-header"><h2>👥 پرسنل</h2><button class="modal-close" onclick="closeModal('staffModal')">×</button></div><div class="modal-body"><div class="btn-add-staff" id="staffAddBox"><input type="text" id="newStaffName" placeholder="نام"><input type="number" id="newStaffReq" value="175" style="width:80px;flex:0;"><button onclick="addStaff()">➕</button></div><div class="staff-list" id="staffList"></div></div></div></div>
-<div class="modal-overlay" id="logsModal"><div class="modal-content"><div class="modal-header"><h2>📝 گزارش تغییرات</h2><button class="modal-close" onclick="closeModal('logsModal')">×</button></div><div class="modal-body" id="logsBody"></div></div></div>
-<div class="modal-overlay" id="recoveryModal"><div class="modal-content"><div class="modal-header"><h2>🔁 بازیابی رمز</h2><button class="modal-close" onclick="closeModal('recoveryModal')">×</button></div><div class="modal-body"><input type="password" id="recoveryCode" placeholder="کد بازیابی" style="width:100%;margin-bottom:12px;padding:11px;"><input type="password" id="recoveryNewPassword" placeholder="رمز جدید" style="width:100%;margin-bottom:12px;padding:11px;"><button class="btn-primary" style="width:100%;padding:11px;" onclick="doRecovery()">تغییر رمز</button><div class="error-msg" id="recoveryError" style="color:red;text-align:center;margin-top:10px;"></div></div></div></div>
-<div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><input type="text" id="dialogInput" style="display:none;"><div class="dialog-actions" id="dialogActions"></div></div></div>
-
-<script>
-const SUPABASE_URL="https://hghkjhvboyemimpqwkkn.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaGtqaHZib3llbWltcHF3a2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NDM3NzIsImV4cCI6MjEwOTExOTc3Mn0.WuxsGGv3GjuEaX_zsZqTigLKY4j9Tt6-b9b5fMaGZQs";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let PERSONNEL = [], state = { shifts: {}, leaves: {} }, currentUser = null, isAdmin = false;
-const MONTH="آبان",DAYS=30,BASE_DATE=new Date(2026,9,23);
-const HOURS={"صبح":6.5,"عصر":5.5,"شب":12},LEAVE_HOURS=7.55;
-const WEEKDAYS=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
-const ZONES=[
-  {name:"بهارستان ۱",cols:["صبح","عصر","شب"],cls:"bg-z1"},
-  {name:"بهارستان ۲",cols:["صبح","عصر","شب"],cls:"bg-z2"},
-  {name:"بهارستان ۳",cols:["صبح","عصر","شب"],cls:"bg-z3"},
-  {name:"نجمه خاتون",cols:["صبح","عصر","شب"],cls:"bg-z4"},
-  {name:"گلشن",cols:["صبح","عصر"],cls:"bg-z5"}
-];
-function getDayInfo(i){const d=new Date(BASE_DATE);d.setDate(BASE_DATE.getDate()+i);return{weekday:WEEKDAYS[d.getDay()],isFriday:d.getDay()===5};}
-function showAlert(m){const b=document.getElementById("alertBox");b.textContent=m;b.style.display="block";setTimeout(()=>b.style.display="none",4000);}
-function showWarning(m){const b=document.getElementById("warnBox");b.innerHTML=m;b.style.display="block";setTimeout(()=>b.style.display="none",8000);}
-function closeModal(id){document.getElementById(id).classList.remove("active");}
-function toggleDarkMode(){document.body.classList.toggle("dark-mode");}
-function openHelp(){showAlert("راهنما: برای ثبت شیفت، روی خانه‌ها کلیک کنید.");}
-function openStaff(){renderStaffList();document.getElementById("staffModal").classList.add("active");}
-function openLogs(){loadLogs();document.getElementById("logsModal").classList.add("active");}
-function openRecovery(){document.getElementById("recoveryModal").classList.add("active");}
-function dialog(opts){return new Promise(r=>{const o=document.getElementById("dialogOverlay"),t=document.getElementById("dialogTitle"),m=document.getElementById("dialogMessage"),i=document.getElementById("dialogInput"),a=document.getElementById("dialogActions");t.textContent=opts.title||"";m.textContent=opts.message||"";i.value=opts.def||"";i.style.display=opts.input?"block":"none";a.innerHTML="";const f=v=>{o.classList.remove("active");r(v);};if(opts.input){const ok=document.createElement("button");ok.className="btn-primary";ok.textContent="تأیید";ok.onclick=()=>f(i.value.trim());const c=document.createElement("button");c.className="btn-cancel";c.textContent="انصراف";c.onclick=()=>f(null);a.append(ok,c);}else if(opts.confirm){const ok=document.createElement("button");ok.className=opts.danger?"btn-danger":"btn-primary";ok.textContent="تأیید";ok.onclick=()=>f(true);const c=document.createElement("button");c.className="btn-cancel";c.textContent="انصراف";c.onclick=()=>f(false);a.append(ok,c);}else{const ok=document.createElement("button");ok.className="btn-primary";ok.textContent="باشه";ok.onclick=()=>f(true);a.append(ok);}o.classList.add("active");});}
-const alertDlg=m=>dialog({message:m}),confirmDlg=(m,d)=>dialog({message:m,confirm:true,danger:d}),promptDlg=(m,def)=>dialog({message:m,input:true,def:def});
-
-async function init(){
-  if(localStorage.getItem("darkMode")==="1")document.body.classList.add("dark-mode");
-  const{data:{session}}=await sb.auth.getSession();
-  if(session&&session.user){
-    const{data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).single();
-    if(p){currentUser=p;isAdmin=p.is_admin;await loadAll();showMain();return;}
-  }
-  await loadLoginList();showLogin();
-}
-async function loadLoginList(){
-  const{data}=await sb.from("profiles").select("name,is_admin").order("name");
-  const s=document.getElementById("loginName");s.innerHTML='<option value="">انتخاب کنید...</option>';
-  (data||[]).forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name+(p.is_admin?" 👑":"");s.appendChild(o);});
-  document.getElementById("loadingScreen").style.display="none";document.getElementById("loginScreen").style.display="block";
-}
-function showLogin(){document.getElementById("mainApp").style.display="none";document.getElementById("loginScreen").style.display="block";}
-function showMain(){document.getElementById("loginScreen").style.display="none";document.getElementById("mainApp").style.display="block";document.body.classList.toggle("is-admin",isAdmin);document.getElementById("currentUserName").textContent=currentUser.name;renderAll();}
-async function doLogin(){
-  const name=document.getElementById("loginName").value,pass=document.getElementById("loginPassword").value,err=document.getElementById("loginError");
-  if(!name||!pass){err.textContent="نام و رمز را وارد کنید";return;}
-  err.textContent="";
   
-  let email;
-  if(name==="مدیر سامانه") email="admin@dorm.local";
-  else if(name==="ادمین تست") email="testadmin@dorm.local";
-  else email=`${encodeURIComponent(name).replace(/%/g,'').toLowerCase()}@dorm.local`;
-
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent="رمز یا نام اشتباه است";return;}
-  const{data:p}=await sb.from("profiles").select("*").eq("id",data.user.id).single();
-  currentUser=p;isAdmin=p.is_admin;await loadAll();showMain();
-}
-async function doLogout(){await sb.auth.signOut();currentUser=null;isAdmin=false;await loadLoginList();showLogin();}
-async function loadAll(){
-  const{data:p}=await sb.from("profiles").select("*").order("name");
-  PERSONNEL=(p||[]).map(x=>({id:x.id,name:x.name,req:x.required_hours,is_admin:x.is_admin}));
-  const{data:s}=await sb.from("shifts").select("*");
-  const{data:l}=await sb.from("leaves").select("*");
-  state.shifts={};state.leaves={};
-  (s||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per)state.shifts[`${x.day}|${x.zone}|${x.shift_type}`]=per.name;});
-  (l||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per){if(!state.leaves[per.name])state.leaves[per.name]={};state.leaves[per.name][String(x.day)]=true;}});
-}
-function renderAll(){renderTable();renderLeaves();renderStats();}
-
 function renderTable(){
   const visiblePersonnel = PERSONNEL.filter(p => !p.is_admin);
   const zr=document.getElementById("zoneHeaderRow");Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove();});
@@ -530,7 +264,7 @@ function renderTable(){
   for(let d=0;d<DAYS;d++){
     const info=getDayInfo(d),tr=document.createElement("tr");if(info.isFriday)tr.classList.add("is-friday");
     tr.innerHTML=`<td class="day-cell">${info.weekday}</td><td class="date-cell">${d+1} ${MONTH}</td>`;
-        ZONES.forEach(z=>z.cols.forEach(c=>{
+    ZONES.forEach(z=>z.cols.forEach(c=>{
       const td=document.createElement("td"),key=`${d}|${z.name}|${c}`,sel=document.createElement("select");
       sel.className="s-cell";sel.dataset.key=key;sel.dataset.day=d;sel.dataset.zone=z.name;sel.dataset.shift=c;
       const owner=state.shifts[key]||"";
@@ -808,6 +542,36 @@ async function openChangePassword(){
   const{error:err2}=await sb.auth.updateUser({password:newPw});
   if(err2)return alertDlg("خطا: "+err2.message);
   alertDlg("✅ رمز تغییر کرد.");
+}
+
+function openExcel() {
+  if (typeof XLSX === "undefined") { alertDlg("کتابخانه اکسل بارگذاری نشد."); return; }
+  if (PERSONNEL.length === 0) { alertDlg("پرسنل خالی است."); return; }
+  const wb = XLSX.utils.book_new();
+  wb.Workbook = { Views: [{ RTL: true }] };
+  const ST = { font: { name: "Vazirmatn", sz: 11, color: { rgb: "1E293B" } }, fontWhite: { name: "Vazirmatn", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, border: { top: { style: "thin", color: { rgb: "CBD5E1" } }, bottom: { style: "thin", color: { rgb: "CBD5E1" } }, left: { style: "thin", color: { rgb: "CBD5E1" } }, right: { style: "thin", color: { rgb: "CBD5E1" } } }, alignCenter: { horizontal: "center", vertical: "center", wrapText: true, readingOrder: 2 } };
+  function styleCell(ws,r,c,st){const ref=XLSX.utils.encode_cell({r,c});if(!ws[ref])ws[ref]={v:"",t:"s"};ws[ref].s=st;}
+  function applyRange(ws,r1,c1,r2,c2,st){for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)styleCell(ws,r,c,st);}
+  
+  const sheet1=[["روز","تاریخ"]];ZONES.forEach(z=>z.cols.forEach(()=>sheet1[0].push(z.name)));
+  const row2=["",""];ZONES.forEach(z=>z.cols.forEach(c=>row2.push(c)));sheet1.push(row2);
+  for(let d=0;d<DAYS;d++){const info=getDayInfo(d);const row=[info.weekday,(d+1)+" "+MONTH];ZONES.forEach(zone=>zone.cols.forEach(t=>{const p=state.shifts[`${d}|${zone.name}|${t}`]||"";if(!isAdmin&&p&&p!==currentUser.name)row.push("🚫");else row.push(p);}));sheet1.push(row);}
+  const ws1=XLSX.utils.aoa_to_sheet(sheet1);ws1["!cols"]=[{wch:12},{wch:14}];for(let i=0;i<15;i++)ws1["!cols"].push({wch:16});
+  applyRange(ws1,0,0,DAYS+1,1,{font:ST.fontWhite,fill:{fgColor:{rgb:"334155"}},border:ST.border,alignment:ST.alignCenter});
+  XLSX.utils.book_append_sheet(wb,ws1,"برنامه شیفت");
+  
+  const m={},e={},n={},h={},lc={};PERSONNEL.forEach(p=>{m[p.name]=0;e[p.name]=0;n[p.name]=0;h[p.name]=0;lc[p.name]=0;});
+  Object.keys(state.leaves).forEach(per=>{if(lc[per]!==undefined)lc[per]=Object.keys(state.leaves[per]).length;});
+  for(let d=0;d<DAYS;d++){ZONES.forEach(z=>z.cols.forEach(t=>{const person=state.shifts[`${d}|${z.name}|${t}`];if(!person)return;const p=PERSONNEL.find(x=>x.name===person);if(!p)return;const{holiday}=calcShiftHours(t,d,p.req);h[person]+=holiday;if(t==="صبح")m[person]+=HOURS[t];else if(t==="عصر")e[person]+=HOURS[t];else n[person]+=HOURS[t];}));}
+  
+  const sheet2=[["نام","موظفی","صبح","عصر","شب","تعطیلات","مرخصی","کارکرد","اضافه","کسر"]];
+  const statList=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+  statList.forEach(p=>{const ts=m[p.name]+e[p.name]+n[p.name]+h[p.name],lh=Math.round(lc[p.name]*LEAVE_HOURS*100)/100,total=Math.round((ts+lh)*10)/10,diff=Math.round((total-p.req)*10)/10;sheet2.push([p.name,p.req,m[p.name],e[p.name],n[p.name],Math.round(h[p.name]*10)/10,lh,total,diff>0?diff:0,diff<0?Math.abs(diff):0]);});
+  const ws2=XLSX.utils.aoa_to_sheet(sheet2);ws2["!cols"]=[{wch:20},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:10}];
+  applyRange(ws2,0,0,0,9,{font:ST.fontWhite,fill:{fgColor:{rgb:"0F172A"}},border:ST.border,alignment:ST.alignCenter});
+  XLSX.utils.book_append_sheet(wb,ws2,"آمار کارکرد");
+  
+  const wbout=XLSX.write(wb,{bookType:"xlsx",type:"array"});const blob=new Blob([wbout],{type:"application/octet-stream"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="گزارش-شیفت.xlsx";a.click();URL.revokeObjectURL(a.href);showAlert("✅ فایل اکسل دانلود شد.");
 }
 
 function switchTab(n){
