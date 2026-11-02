@@ -108,8 +108,7 @@ body.dark-mode .info-banner{background:linear-gradient(135deg,#1e3a8a,#1e40af);c
 </style>
 </head>
 <body>
-
-<div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
+  <div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
   <div style="text-align:center;">
     <div style="font-size:48px;margin-bottom:16px;">⏳</div>
     <div style="font-size:16px;font-weight:700;color:#64748b;">در حال اتصال...</div>
@@ -180,7 +179,6 @@ body.dark-mode .info-banner{background:linear-gradient(135deg,#1e3a8a,#1e40af);c
 <div class="modal-overlay" id="logsModal"><div class="modal-content"><div class="modal-header"><h2>📝 گزارش تغییرات</h2><button class="modal-close" onclick="closeModal('logsModal')">×</button></div><div class="modal-body" id="logsBody"></div></div></div>
 <div class="modal-overlay" id="recoveryModal"><div class="modal-content"><div class="modal-header"><h2>🔁 بازیابی رمز</h2><button class="modal-close" onclick="closeModal('recoveryModal')">×</button></div><div class="modal-body"><input type="password" id="recoveryCode" placeholder="کد بازیابی" style="width:100%;margin-bottom:12px;padding:11px;"><input type="password" id="recoveryNewPassword" placeholder="رمز جدید" style="width:100%;margin-bottom:12px;padding:11px;"><button class="btn-primary" style="width:100%;padding:11px;" onclick="doRecovery()">تغییر رمز</button><div class="error-msg" id="recoveryError" style="color:red;text-align:center;margin-top:10px;"></div></div></div></div>
 <div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><input type="text" id="dialogInput" style="display:none;"><div class="dialog-actions" id="dialogActions"></div></div></div>
-
 <script>
 const SUPABASE_URL="https://hghkjhvboyemimpqwkkn.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaGtqaHZib3llbWltcHF3a2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NDM3NzIsImV4cCI6MjEwOTExOTc3Mn0.WuxsGGv3GjuEaX_zsZqTigLKY4j9Tt6-b9b5fMaGZQs";
@@ -196,6 +194,7 @@ const ZONES=[
   {name:"نجمه خاتون",cols:["صبح","عصر","شب"],cls:"bg-z4"},
   {name:"گلشن",cols:["صبح","عصر"],cls:"bg-z5"}
 ];
+
 function getDayInfo(i){const d=new Date(BASE_DATE);d.setDate(BASE_DATE.getDate()+i);return{weekday:WEEKDAYS[d.getDay()],isFriday:d.getDay()===5};}
 function showAlert(m){const b=document.getElementById("alertBox");b.textContent=m;b.style.display="block";setTimeout(()=>b.style.display="none",4000);}
 function showWarning(m){const b=document.getElementById("warnBox");b.innerHTML=m;b.style.display="block";setTimeout(()=>b.style.display="none",8000);}
@@ -251,7 +250,7 @@ async function loadAll(){
   (l||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per){if(!state.leaves[per.name])state.leaves[per.name]={};state.leaves[per.name][String(x.day)]=true;}});
 }
 function renderAll(){renderTable();renderLeaves();renderStats();}
-  
+
 function renderTable(){
   const visiblePersonnel = PERSONNEL.filter(p => !p.is_admin);
   const zr=document.getElementById("zoneHeaderRow");Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove();});
@@ -354,8 +353,7 @@ async function onShiftChange(sel){
     state.shifts[key]=val;renderAll();showAlert("✅ شیفت ثبت شد.");
   }catch(e){await alertDlg("⛔ خطا: "+e.message);sel.value=prevOwner;}
 }
-
-function renderLeaves(){
+  function renderLeaves(){
   const tb=document.getElementById("leaveTableBody");tb.innerHTML="";
   const list=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
   if(list.length===0){tb.innerHTML="<tr><td colspan='6' style='text-align:center;'>ردیفی نیست</td></tr>";return;}
