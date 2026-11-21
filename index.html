@@ -2,511 +2,663 @@
 <html dir="rtl" lang="fa">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>برنامه شیفت خوابگاه‌ها — آبان ۱۴۰۵</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مدیریت شیفت - آذر ۱۴۰۵</title>
+<script>
+var jalaali=(function(){var b=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];function jc(jy,w){var bl=b.length,gy=jy+621,lj=-14,jp=b[0],jm,jump,leap,lg,march,n,i;if(jy<jp||jy>=b[bl-1])throw new Error('bad');for(i=1;i<bl;i++){jm=b[i];jump=jm-jp;if(jy<jm)break;lj=lj+~~(jump/33)*8+~~((jump%33)/4);jp=jm;}n=jy-jp;lj=lj+~~(n/33)*8+~~(((n%33)+3)/4);if((jump%33)===4&&jump-n===4)lj+=1;lg=~~(gy/4)-~~(((~~(gy/100)+1)*3)/4)-150;march=20+lj-lg;if(!w){if(jump-n<6)n=n-jump+~~((jump+4)/33)*33;leap=(((n+1)%33)-1)%4;if(leap===-1)leap=4;}return{leap:leap,gy:gy,march:march};}function j2d(jy,jm,jd){var r=jc(jy,true);return g2d(r.gy,3,r.march)+(jm-1)*31-~~(jm/7)*(jm-7)+jd-1;}function d2j(jdn){var gy=d2g(jdn).gy,jy=gy-621,r=jc(jy,false),jdn1f=g2d(gy,3,r.march),jd,jm,k;k=jdn-jdn1f;if(k>=0){if(k<=185){jm=1+~~(k/31);jd=(k%31)+1;return{jy:jy,jm:jm,jd:jd};}else{k-=186;}}else{jy-=1;k+=179;if(r.leap===1)k+=1;}jm=7+~~(k/30);jd=(k%30)+1;return{jy:jy,jm:jm,jd:jd};}function g2d(gy,gm,gd){var d=~~(((gy+~~((gm-8)/6)+100100)*1461)/4)+~~((153*((gm+9)%12)+2)/5)+gd-34840408;d=d-~~((~~((gy+100100+~~((gm-8)/6))/100)*3)/4)+752;return d;}function d2g(jdn){var j,i,gd,gm,gy;j=4*jdn+139361631;j=j+~~((~~((4*jdn+183187720)/146097)*3)/4)*4-3908;i=~~(((j%1461)/4))*5+308;gd=~~(((i%153)/5))+1;gm=((~~(i/153))%12)+1;gy=~~(j/1461)-100100+~~((8-gm)/6);return{gy:gy,gm:gm,gd:gd};}return{toJalaali:function(gy,gm,gd){if(typeof gy==='object'){gd=gy.gd;gm=gy.gm;gy=gy.gy;}return d2j(g2d(gy,gm,gd));},toGregorian:function(jy,jm,jd){if(typeof jy==='object'){jd=jy.jd;jm=jy.jm;jy=jy.jy;}return d2g(j2d(jy,jm,jd));}};})();
+</script>
 <style>
-:root{--bg-body:#f1f5f9;--bg-card:#fff;--bg-header-grad:linear-gradient(135deg,#1e293b,#0f172a);--text-main:#0f172a;--text-muted:#64748b;--border-color:#e2e8f0;--th-bg:#f8fafc;--input-bg:#fff;--primary:#3b82f6;--danger:#ef4444;--warn:#f59e0b;--ok:#10b981;--shadow-md:0 4px 12px rgba(15,23,42,.08);--shadow-lg:0 10px 30px rgba(15,23,42,.12);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--transition:all .2s}
-body.dark-mode{--bg-body:#0f172a;--bg-card:#1e293b;--bg-header-grad:linear-gradient(135deg,#1e293b,#020617);--text-main:#f1f5f9;--text-muted:#94a3b8;--border-color:#334155;--th-bg:#0f172a;--input-bg:#0f172a;--primary:#60a5fa}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',Tahoma,sans-serif}
-body{background:var(--bg-body);color:var(--text-main);padding:10px;min-height:100vh;line-height:1.6;font-size:13px;transition:background .3s,color .3s}
-.container{max-width:1400px;margin:0 auto}
-.app-header{background:var(--bg-header-grad);color:#fff;padding:14px 18px;border-radius:var(--radius-lg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;box-shadow:var(--shadow-lg)}
-.app-header h1{font-size:16px;font-weight:900;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.admin-badge{display:none;font-size:11px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f;padding:4px 10px;border-radius:20px}
-body.is-admin .admin-badge{display:inline-flex}
-body.is-admin .admin-only{display:inline-flex!important}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.tool-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;transition:var(--transition)}
-.tool-btn:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
-.tool-btn.danger{background:rgba(239,68,68,.3)}
-.tool-btn.admin-only{display:none}
-.user-info{background:rgba(255,255,255,.1);padding:6px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
-.alert-box,.warn-box{display:none;padding:14px 18px;border-radius:var(--radius-md);margin-bottom:14px;font-size:13px;font-weight:700;box-shadow:var(--shadow-md);position:sticky;top:12px;z-index:100;border-right:5px solid}
-.alert-box{background:#fef2f2;color:#991b1b;border-right-color:var(--danger)}
-.warn-box{background:#fffbeb;color:#92400e;border-right-color:var(--warn)}
-body.dark-mode .alert-box{background:#450a0a;color:#fecaca}
-body.dark-mode .warn-box{background:#451a03;color:#fde68a}
-.tabs-nav{display:flex;gap:6px;margin-bottom:16px;background:var(--bg-card);padding:6px;border-radius:var(--radius-md);border:1px solid var(--border-color);overflow-x:auto}
-.tab-btn{flex:1;min-width:120px;padding:11px 14px;border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:800;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);white-space:nowrap}
-.tab-btn.active{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+:root{--bg-body:#f4f7f9;--bg-card:#fff;--bg-header:#0f172a;--text-main:#1e293b;--text-muted:#64748b;--border:#e2e8f0;--primary:#2563eb;--primary-hover:#1d4ed8;--danger:#dc2626;--danger-bg:#fef2f2;--radius:8px;--radius-sm:6px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn','Tahoma',sans-serif}
+body{background:var(--bg-body);color:var(--text-main);min-height:100vh;font-size:13px;display:flex;flex-direction:column;overflow-x:hidden}
+.container{max-width:1400px;margin:0 auto;padding:16px;flex:1;width:100%}
+.app-header{background:var(--bg-header);color:#fff;padding:14px 20px;border-radius:var(--radius);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.app-header h1{font-size:16px;font-weight:800}
+.admin-badge{display:none;font-size:11px;background:rgba(255,255,255,.15);padding:2px 10px;border-radius:20px}
+body.is-admin .admin-badge{display:inline-block}
+.controls{display:flex;gap:6px;flex-wrap:wrap}
+.tool-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:600}
+.tool-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.admin-only{display:none}
+body.is-admin .admin-only{display:inline-block}
+.user-info{background:rgba(255,255,255,.1);padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600}
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px;background:var(--bg-card);padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border)}
+.tabs-nav{display:flex;gap:4px;overflow-x:auto}
+.tab-btn{padding:8px 20px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:700;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap}
+.tab-btn.active{background:var(--primary);color:#fff}
+.filter-box{display:none;align-items:center;gap:8px;background:var(--bg-body);padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.filter-box.active{display:flex}
+.filter-box select{border:none;background:transparent;font-size:13px;font-weight:700;outline:none;cursor:pointer;color:var(--text-main)}
 .tab-panel{display:none}.tab-panel.active{display:block}
-.table-container{background:var(--bg-card);border-radius:var(--radius-md);box-shadow:var(--shadow-md);border:1px solid var(--border-color);overflow-x:auto;margin-bottom:18px}
-table.main-table{width:100%;border-collapse:separate;border-spacing:0;text-align:center;font-size:12px}
-th,td{border-bottom:1px solid var(--border-color);border-left:1px solid var(--border-color);padding:8px 4px}
-th:last-child,td:last-child{border-left:none}
-th{font-weight:900;font-size:12px;background:var(--th-bg);position:sticky;top:0;z-index:2}
-thead tr:nth-child(2) th{top:36px}
-.day-cell{font-weight:900;width:70px;white-space:nowrap}
-.date-cell{font-size:11px;width:70px;color:var(--text-muted);white-space:nowrap}
-tr.is-friday td{background:linear-gradient(90deg,#fef3c7,#fffbeb)}
-body.dark-mode tr.is-friday td{background:linear-gradient(90deg,#422006,#1e293b)}
-tr.is-friday .day-cell,tr.is-friday .date-cell{color:#dc2626;font-weight:900}
-.bg-z1{background:#e0f2fe!important;color:#0369a1!important}
-.bg-z2{background:#dcfce7!important;color:#15803d!important}
-.bg-z3{background:#ffedd5!important;color:#c2410c!important}
-.bg-z4{background:#fef9c3!important;color:#a16207!important}
-.bg-z5{background:#f3e8ff!important;color:#6b21a8!important}
-select.s-cell{width:100%;height:36px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:11px;font-weight:700;text-align:center;text-align-last:center;outline:none;cursor:pointer;appearance:none;border-radius:6px;padding:0 4px}
-select.s-cell.mine{background:linear-gradient(135deg,#bbf7d0,#86efac)!important;color:#166534!important;border-color:#22c55e}
-select.s-cell.locked{opacity:.5;cursor:not-allowed;background:#f1f5f9!important}
-select.s-cell.taken{color:#dc2626;font-weight:900}
-.section-box{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;margin-top:18px;border:1px solid var(--border-color);box-shadow:var(--shadow-md)}
-.section-box h3{font-size:14px;margin-bottom:14px;color:var(--primary);border-bottom:2px solid var(--border-color);padding-bottom:10px;font-weight:900}
-.leave-table-wrapper,.stats-table-wrapper{overflow-x:auto;border-radius:var(--radius-sm)}
-table.leave-table,table.stats-table{width:100%;border-collapse:separate;border-spacing:0;text-align:center;font-size:11px;min-width:500px}
-table.leave-table th,table.stats-table th{background:var(--th-bg);padding:10px 6px;border-bottom:2px solid var(--border-color);font-size:11px;font-weight:900}
-table.stats-table th{background:var(--bg-header-grad);color:#fff;position:sticky;top:0}
-table.leave-table td,table.stats-table td{padding:6px;border-bottom:1px solid var(--border-color)}
-.leave-name-cell,.stat-name{font-weight:900;text-align:right;padding-right:12px!important;color:var(--primary);white-space:nowrap;font-size:12px}
-.leave-select{width:100%;height:34px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:11px;text-align:center;outline:none;background:var(--bg-body);color:var(--text-main);padding:0 4px;cursor:pointer}
-.leave-select.locked{opacity:.6;cursor:not-allowed}
-.val-plus{color:#059669;font-weight:900;background:#d1fae5;border-radius:4px}
-.val-minus{color:#dc2626;font-weight:900;background:#fee2e2;border-radius:4px}
-body.dark-mode .val-plus{background:#064e3b;color:#a7f3d0}
-body.dark-mode .val-minus{background:#7f1d1d;color:#fecaca}
-.modal-overlay,.dialog-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;justify-content:center;align-items:center;padding:15px;backdrop-filter:blur(8px)}
-.modal-overlay.active,.dialog-overlay.active{display:flex}
-.dialog-overlay{z-index:2000}
-.modal-content{background:var(--bg-card);color:var(--text-main);width:100%;max-width:600px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
-.modal-header{background:var(--bg-header-grad);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h2{font-size:15px;font-weight:900}
-.modal-close{background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.modal-body{padding:20px;overflow-y:auto;font-size:13px;line-height:1.8}
-.staff-list{margin-top:15px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
-.staff-item{display:flex;justify-content:space-between;align-items:center;background:var(--th-bg);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-color);gap:8px;flex-wrap:wrap}
-.staff-item .staff-info{flex:1;min-width:100px;font-size:13px;font-weight:700}
-.staff-item input.req-input{width:70px;padding:6px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:12px;background:var(--input-bg);color:var(--text-main);text-align:center;font-weight:700}
-.btn-add-staff{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}
-.btn-add-staff input{flex:1;min-width:100px;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--input-bg);color:var(--text-main);outline:none}
-.btn-add-staff button{padding:10px 18px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-weight:700;font-size:13px}
-.btn-del{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px}
-body.dark-mode .btn-del{background:#7f1d1d;color:#fecaca;border-color:#dc2626}
-.btn-secondary{background:var(--th-bg);color:var(--text-main);border:1px solid var(--border-color);padding:10px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-weight:700;font-size:12px}
-.info-banner{background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#1e40af;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:12px;border-right:4px solid var(--primary);line-height:1.7;font-weight:600}
-body.dark-mode .info-banner{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#bfdbfe}
-.dialog-box{background:var(--bg-card);color:var(--text-main);border-radius:var(--radius-md);max-width:420px;width:100%;padding:24px;box-shadow:var(--shadow-lg)}
-.dialog-box h3{font-size:16px;margin-bottom:10px;font-weight:900}
-.dialog-box p{font-size:13px;margin-bottom:16px;color:var(--text-muted);white-space:pre-line;line-height:1.8}
-.dialog-box input{width:100%;padding:11px 14px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;margin-bottom:14px;background:var(--input-bg);color:var(--text-main);outline:none}
-.dialog-actions{display:flex;gap:10px;justify-content:flex-start}
-.dialog-actions button{padding:10px 20px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px}
-.btn-primary{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
-.btn-cancel{background:var(--th-bg);color:var(--text-main);border:1px solid var(--border-color)}
-.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
-.login-box{max-width:420px;margin:40px auto;background:var(--bg-card);padding:28px 24px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);border:1px solid var(--border-color)}
-.login-box h2{font-size:18px;text-align:center;margin-bottom:20px;color:var(--primary)}
-.login-box label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;margin-top:14px}
-.login-box select,.login-box input{width:100%;padding:11px 14px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--input-bg);color:var(--text-main);outline:none}
-.login-box button{width:100%;padding:12px;margin-top:20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
-.login-box .forgot-link{display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--primary);cursor:pointer;text-decoration:underline}
-.login-box .error-msg{color:var(--danger);font-size:12px;font-weight:700;margin-top:10px;text-align:center;min-height:18px}
-@media(min-width:768px){body{padding:20px;font-size:14px}.app-header h1{font-size:19px}.tool-btn{width:42px;height:42px}}
-@media print{.app-header,.tool-btn,.modal-overlay,.dialog-overlay,.tabs-nav,.controls{display:none!important}.tab-panel{display:block!important}body{background:#fff;color:#000}}
+.table-container{background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);overflow-x:auto;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;text-align:center}
+th,td{border:1px solid var(--border);padding:10px 4px}
+th{background:#f8fafc;color:var(--text-muted);font-weight:800;font-size:12px;position:sticky;top:0;z-index:10}
+td{font-size:12px;background:#fff;color:var(--text-main)}
+.day-cell{font-weight:800;width:70px;white-space:nowrap;background:#f8fafc}
+.date-cell{width:70px;color:var(--text-muted);font-size:11px;background:#f8fafc}
+tr.is-friday td{background:#fffbeb}
+tr.is-friday .day-cell,tr.is-friday .date-cell{color:var(--danger);font-weight:800}
+.bg-z1{background:#eff6ff;color:#1d4ed8;border-bottom:2px solid #3b82f6}
+.bg-z2{background:#f0fdf4;color:#15803d;border-bottom:2px solid #22c55e}
+.bg-z3{background:#fff7ed;color:#c2410c;border-bottom:2px solid #f97316}
+.bg-z4{background:#fefce8;color:#a16207;border-bottom:2px solid #eab308}
+.bg-z5{background:#faf5ff;color:#7e22ce;border-bottom:2px solid #a855f7}
+select.s-cell{width:100%;height:32px;border:1px solid transparent;background:transparent;font-size:11px;font-weight:700;text-align:center;outline:none;cursor:pointer;border-radius:4px;color:var(--text-main)}
+select.s-cell:hover{background:#fff;border-color:#cbd5e1}
+select.s-cell.mine{background:#dcfce7;color:#166534;border-color:#86efac}
+select.s-cell.locked{opacity:.6;cursor:not-allowed;background:#f1f5f9}
+select.s-cell.taken{color:var(--danger);font-weight:800;background:var(--danger-bg)}
+.section-card{background:var(--bg-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+.section-card h3{font-size:15px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:12px;font-weight:800}
+.info-banner{background:rgba(37,99,235,.05);color:var(--primary);padding:12px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:12px;border-right:4px solid var(--primary);font-weight:600;line-height:1.7}
+table.leave-table select{width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center;background:#fff;outline:none;color:var(--text-main);cursor:pointer}
+table.stats-table th{background:var(--bg-header);color:#fff}
+.leave-name-cell,.stat-name{font-weight:800;text-align:right;padding-right:12px!important;background:#f8fafc;color:var(--text-main);white-space:nowrap}
+.val-plus{color:#059669;font-weight:800;background:#d1fae5;border-radius:4px;padding:2px 6px;display:inline-block}
+.val-minus{color:var(--danger);font-weight:800;background:var(--danger-bg);border-radius:4px;padding:2px 6px;display:inline-block}
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;justify-content:center;align-items:center;padding:16px}
+.overlay.active{display:flex}
+.modal{background:var(--bg-card);width:100%;max-width:600px;border-radius:var(--radius);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-header{background:#f8fafc;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.modal-close{background:transparent;border:none;font-size:24px;cursor:pointer;color:var(--text-muted)}
+.modal-body{padding:20px;overflow-y:auto}
+.dialog{background:var(--bg-card);width:100%;max-width:440px;border-radius:var(--radius);padding:24px;text-align:center}
+.dialog h3{margin-bottom:10px;font-size:17px}
+.dialog p{color:var(--text-muted);margin-bottom:20px;font-size:13px;line-height:1.7;white-space:pre-line}
+.dialog input{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:20px;outline:none;font-family:inherit;color:var(--text-main)}
+.dialog-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit}
+.btn-warn{background:#f59e0b;color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit}
+.btn-warn:hover{background:#d97706}
+.btn-cancel{background:transparent;border:1px solid var(--border);padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;color:var(--text-main)}
+.login-container{max-width:400px;margin:60px auto;background:var(--bg-card);padding:32px;border-radius:var(--radius);border:1px solid var(--border)}
+.login-container h2{text-align:center;font-size:20px;margin-bottom:8px;font-weight:900}
+.login-container p{text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--text-muted)}
+.form-group input,.form-group select{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#f8fafc;outline:none;font-family:inherit;color:var(--text-main);font-size:14px}
+.btn-full{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:800;font-size:15px;cursor:pointer;margin-top:10px;font-family:inherit}
+.btn-full:hover{background:var(--primary-hover)}
+.support-text{text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:20px;padding-top:16px;border-top:1px dashed var(--border)}
+.staff-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f8fafc;border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--border)}
+.staff-item input{width:70px;padding:6px;border:1px solid var(--border);border-radius:4px;text-align:center;font-family:inherit;color:var(--text-main)}
+.btn-del{background:transparent;color:var(--danger);border:1px solid var(--danger);padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit}
+.log-item{padding:12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;border-right:4px solid #2563eb;margin-bottom:8px}
+.log-item .log-title{font-size:13px;font-weight:800;margin-bottom:6px}
+.log-item .log-by{font-weight:500;color:var(--text-muted);font-size:11px}
+.log-item .log-details{font-size:11px;color:var(--text-muted);line-height:1.6}
+.log-item .log-date{font-size:11px;color:var(--text-muted);margin-top:4px}
+@media(max-width:768px){.app-header{flex-direction:column;text-align:center}.toolbar{flex-direction:column;align-items:stretch}.tabs-nav{overflow-x:auto}th,td{padding:6px 2px;font-size:11px}select.s-cell{font-size:10px;height:28px}}
 </style>
 </head>
 <body>
-
-<div id="loadingScreen" style="display:flex;justify-content:center;align-items:center;min-height:100vh;">
-  <div style="text-align:center;">
-    <div style="font-size:48px;margin-bottom:16px;">⏳</div>
-    <div style="font-size:16px;font-weight:700;color:#64748b;">در حال اتصال...</div>
+<div id="loginScreen">
+  <div class="login-container">
+    <h2>ورود به سیستم</h2>
+    <p>نام خود را انتخاب کنید</p>
+    <div class="form-group">
+      <label>نام کاربری</label>
+      <select id="loginName"></select>
+    </div>
+    <button onclick="doLogin()" class="btn-full">ورود</button>
+    <div class="support-text">آفلاین - داده‌ها روی این دستگاه ذخیره می‌شوند</div>
   </div>
 </div>
-
-<div id="loginScreen" style="display:none;">
-  <div class="login-box">
-    <h2>🔐 ورود به سامانه شیفت</h2>
-    <label>👤 نام کاربری:</label>
-    <select id="loginName"><option value="">در حال بارگذاری...</option></select>
-    <label>🔑 رمز عبور:</label>
-    <input type="password" id="loginPassword" placeholder="رمز عبور" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()" id="loginBtn">ورود</button>
-    <span class="forgot-link" onclick="openRecovery()">🔁 رمز را فراموش کرده‌اید؟</span>
-    <div class="error-msg" id="loginError"></div>
-  </div>
-</div>
-
-<div class="container" id="mainApp" style="display:none;">
+<div class="container" id="mainApp" style="display:none">
   <div class="app-header">
-    <h1>📅 برنامه شیفت خوابگاه‌ها <span class="admin-badge">👑 ادمین</span></h1>
+    <h1>مدیریت شیفت <span class="admin-badge">مدیر</span></h1>
     <div class="controls">
-      <span class="user-info" id="userInfoBox">👤 <span id="currentUserName"></span></span>
-      <button class="tool-btn" onclick="openExcel()" title="خروجی اکسل">📊</button>
-      <button class="tool-btn admin-only" onclick="openStaff()" title="پرسنل">👥</button>
-      <button class="tool-btn admin-only" onclick="openLogs()" title="گزارش تغییرات">📝</button>
-      <button class="tool-btn" onclick="toggleDarkMode()" title="حالت شب">🌙</button>
-      <button class="tool-btn" onclick="openHelp()" title="راهنما">❓</button>
-      <button class="tool-btn" onclick="openChangePassword()" title="تغییر رمز">🔐</button>
-      <button class="tool-btn" onclick="doLogout()" title="خروج">🚪</button>
+      <span class="user-info" id="currentUserName"></span>
+      <button class="tool-btn" onclick="exportXLSX()">خروجی اکسل</button>
+      <button class="tool-btn admin-only" onclick="openStaff()">پرسنل</button>
+      <button class="tool-btn admin-only" onclick="openLogs()">گزارش‌ها</button>
+      <button class="tool-btn" onclick="doLogout()" style="color:#fca5a5">خروج</button>
     </div>
   </div>
-  <div class="alert-box" id="alertBox"></div>
-  <div class="warn-box" id="warnBox"></div>
-  <div class="tabs-nav">
-    <button class="tab-btn active" id="tabBtnShifts" onclick="switchTab('shifts')">📅 شیفت</button>
-    <button class="tab-btn" id="tabBtnLeaves" onclick="switchTab('leaves')">🏖️ مرخصی</button>
-    <button class="tab-btn" id="tabBtnStats" onclick="switchTab('stats')">📊 آمار</button>
+  <div class="toolbar">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('shifts',this)">برنامه شیفت‌ها</button>
+      <button class="tab-btn" onclick="switchTab('leaves',this)">مدیریت مرخصی</button>
+      <button class="tab-btn" onclick="switchTab('stats',this)">آمار کارکرد</button>
+    </div>
+    <div class="filter-box active" id="zoneFilterBox">
+      <span style="font-size:12px;font-weight:700;color:var(--text-muted)">فیلتر:</span>
+      <select id="zoneFilter" onchange="renderTable()"><option value="all">همه خوابگاه‌ها</option></select>
+    </div>
   </div>
-  <div class="tab-panel active" id="panelShifts">
+  <div id="panel-shifts" class="tab-panel active">
+    <div class="info-banner">📌 حداکثر ۲ شیفت در روز | صبح+شب مجاز نیست | شب متوالی مجاز نیست | بعد از شب شیفت مجاز نیست | حداکثر ۲ جمعه (هشدار داده می‌شود ولی انتخاب آزاد است)</div>
     <div class="table-container">
-      <table class="main-table">
-        <thead><tr id="zoneHeaderRow"><th rowspan="2" class="day-cell">روز</th><th rowspan="2" class="date-cell">تاریخ</th></tr><tr id="subHeader"></tr></thead>
+      <table>
+        <thead>
+          <tr id="zoneHeaderRow">
+            <th rowspan="2" class="day-cell">روز</th>
+            <th rowspan="2" class="date-cell">تاریخ</th>
+          </tr>
+          <tr id="subHeader"></tr>
+        </thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
-  <div class="tab-panel" id="panelLeaves">
-    <div class="section-box">
-      <h3>🏖️ ثبت مرخصی</h3>
-      <div class="leave-table-wrapper">
-        <table class="leave-table"><thead><tr><th>نام</th><th>مرخصی ۱</th><th>مرخصی ۲</th><th>مرخصی ۳</th><th>مرخصی ۴</th><th>مرخصی ۵</th></tr></thead><tbody id="leaveTableBody"></tbody></table>
+  <div id="panel-leaves" class="tab-panel">
+    <div class="section-card">
+      <h3>مدیریت مرخصی‌ها</h3>
+      <div class="info-banner">حداکثر ۲ نفر در هر روز. جمعه‌ها مجاز نیست.</div>
+      <div style="overflow-x:auto">
+        <table class="leave-table">
+          <thead>
+            <tr>
+              <th>نام</th>
+              <th>مرخصی ۱</th>
+              <th>مرخصی ۲</th>
+              <th>مرخصی ۳</th>
+              <th>مرخصی ۴</th>
+              <th>مرخصی ۵</th>
+            </tr>
+          </thead>
+          <tbody id="leaveTableBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
-  <div class="tab-panel" id="panelStats">
-    <div class="section-box">
-      <h3>📊 آمار</h3>
-      <div class="stats-table-wrapper">
-        <table class="stats-table"><thead><tr><th>نام</th><th>موظفی</th><th>صبح</th><th>عصر</th><th>شب</th><th>تعطیلات</th><th>مرخصی</th><th>کارکرد</th><th>اضافه</th><th>کسر</th></tr></thead><tbody id="statsBody"></tbody></table>
+  <div id="panel-stats" class="tab-panel">
+    <div class="section-card">
+      <h3>آمار کارکرد</h3>
+      <div style="overflow-x:auto">
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>نام</th>
+              <th>موظفی</th>
+              <th>صبح</th>
+              <th>عصر</th>
+              <th>شب</th>
+              <th>تعطیلات</th>
+              <th>مرخصی</th>
+              <th>کارکرد</th>
+              <th>اضافه</th>
+              <th>کسر</th>
+            </tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
-
-<div class="modal-overlay" id="staffModal"><div class="modal-content"><div class="modal-header"><h2>👥 پرسنل</h2><button class="modal-close" onclick="closeModal('staffModal')">×</button></div><div class="modal-body"><div class="btn-add-staff" id="staffAddBox"><input type="text" id="newStaffName" placeholder="نام"><input type="number" id="newStaffReq" value="175" style="width:80px;flex:0;"><button onclick="addStaff()">➕</button></div><div class="staff-list" id="staffList"></div></div></div></div>
-<div class="modal-overlay" id="logsModal"><div class="modal-content"><div class="modal-header"><h2>📝 گزارش تغییرات</h2><button class="modal-close" onclick="closeModal('logsModal')">×</button></div><div class="modal-body" id="logsBody"></div></div></div>
-<div class="modal-overlay" id="recoveryModal"><div class="modal-content"><div class="modal-header"><h2>🔁 بازیابی رمز</h2><button class="modal-close" onclick="closeModal('recoveryModal')">×</button></div><div class="modal-body"><input type="password" id="recoveryCode" placeholder="کد بازیابی" style="width:100%;margin-bottom:12px;padding:11px;"><input type="password" id="recoveryNewPassword" placeholder="رمز جدید" style="width:100%;margin-bottom:12px;padding:11px;"><button class="btn-primary" style="width:100%;padding:11px;" onclick="doRecovery()">تغییر رمز</button><div class="error-msg" id="recoveryError" style="color:red;text-align:center;margin-top:10px;"></div></div></div></div>
-<div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><input type="text" id="dialogInput" style="display:none;"><div class="dialog-actions" id="dialogActions"></div></div></div>
+<div class="overlay" id="staffModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>مدیریت پرسنل</h2>
+      <button class="modal-close" onclick="closeModal('staffModal')">×</button>
+    </div>
+    <div class="modal-body" id="staffList"></div>
+  </div>
+</div>
+<div class="overlay" id="logsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>گزارش رویدادها</h2>
+      <button class="modal-close" onclick="closeModal('logsModal')">×</button>
+    </div>
+    <div class="modal-body" id="logsBody"></div>
+  </div>
+</div>
+<div class="overlay" id="dialogOverlay">
+  <div class="dialog">
+    <h3 id="dialogTitle"></h3>
+    <p id="dialogMessage"></p>
+    <input type="text" id="dialogInput" style="display:none">
+    <div class="dialog-actions" id="dialogActions"></div>
+  </div>
+</div>
 <script>
-const SUPABASE_URL="https://hghkjhvboyemimpqwkkn.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnaGtqaHZib3llbWltcHF3a2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NDM3NzIsImV4cCI6MjEwOTExOTc3Mn0.WuxsGGv3GjuEaX_zsZqTigLKY4j9Tt6-b9b5fMaGZQs";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let PERSONNEL = [], state = { shifts: {}, leaves: {} }, currentUser = null, isAdmin = false;
-const MONTH="آبان",DAYS=30,BASE_DATE=new Date(2026,9,23);
-const HOURS={"صبح":6.5,"عصر":5.5,"شب":12},LEAVE_HOURS=7.55;
-const WEEKDAYS=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+const MONTH="آذر",DAYS=30;
+const HOURS={"صبح":6.5,"عصر":5.5,"شب":12},LEAVE_HOURS=7.33;
 const ZONES=[
-  {name:"بهارستان ۱",cols:["صبح","عصر","شب"],cls:"bg-z1"},
-  {name:"بهارستان ۲",cols:["صبح","عصر","شب"],cls:"bg-z2"},
-  {name:"بهارستان ۳",cols:["صبح","عصر","شب"],cls:"bg-z3"},
-  {name:"نجمه خاتون",cols:["صبح","عصر","شب"],cls:"bg-z4"},
-  {name:"گلشن",cols:["صبح","عصر"],cls:"bg-z5"}
+{name:"بهارستان ۱",cols:["صبح","عصر","شب"],cls:"bg-z1"},
+{name:"بهارستان ۲",cols:["صبح","عصر","شب"],cls:"bg-z2"},
+{name:"بهارستان ۳",cols:["صبح","عصر","شب"],cls:"bg-z3"},
+{name:"نجمه خاتون",cols:["صبح","عصر","شب"],cls:"bg-z4"},
+{name:"گلشن",cols:["صبح","عصر"],cls:"bg-z5"}
 ];
-function getDayInfo(i){const d=new Date(BASE_DATE);d.setDate(BASE_DATE.getDate()+i);return{weekday:WEEKDAYS[d.getDay()],isFriday:d.getDay()===5};}
-function showAlert(m){const b=document.getElementById("alertBox");b.textContent=m;b.style.display="block";setTimeout(()=>b.style.display="none",4000);}
-function showWarning(m){const b=document.getElementById("warnBox");b.innerHTML=m;b.style.display="block";setTimeout(()=>b.style.display="none",8000);}
-function closeModal(id){document.getElementById(id).classList.remove("active");}
-function toggleDarkMode(){document.body.classList.toggle("dark-mode");}
-function openHelp(){showAlert("راهنما: برای ثبت شیفت، روی خانه‌ها کلیک کنید.");}
-function openExcel(){showAlert("در حال آماده‌سازی...");}
-function openStaff(){renderStaffList();document.getElementById("staffModal").classList.add("active");}
-function openLogs(){loadLogs();document.getElementById("logsModal").classList.add("active");}
-function openRecovery(){document.getElementById("recoveryModal").classList.add("active");}
-function dialog(opts){return new Promise(r=>{const o=document.getElementById("dialogOverlay"),t=document.getElementById("dialogTitle"),m=document.getElementById("dialogMessage"),i=document.getElementById("dialogInput"),a=document.getElementById("dialogActions");t.textContent=opts.title||"";m.textContent=opts.message||"";i.value=opts.def||"";i.style.display=opts.input?"block":"none";a.innerHTML="";const f=v=>{o.classList.remove("active");r(v);};if(opts.input){const ok=document.createElement("button");ok.className="btn-primary";ok.textContent="تأیید";ok.onclick=()=>f(i.value.trim());const c=document.createElement("button");c.className="btn-cancel";c.textContent="انصراف";c.onclick=()=>f(null);a.append(ok,c);}else if(opts.confirm){const ok=document.createElement("button");ok.className=opts.danger?"btn-danger":"btn-primary";ok.textContent="تأیید";ok.onclick=()=>f(true);const c=document.createElement("button");c.className="btn-cancel";c.textContent="انصراف";c.onclick=()=>f(false);a.append(ok,c);}else{const ok=document.createElement("button");ok.className="btn-primary";ok.textContent="باشه";ok.onclick=()=>f(true);a.append(ok);}o.classList.add("active");});}
-const alertDlg=m=>dialog({message:m}),confirmDlg=(m,d)=>dialog({message:m,confirm:true,danger:d}),promptDlg=(m,def)=>dialog({message:m,input:true,def:def});
+const DEFAULT_PERSONNEL=[
+{name:"مدیر سامانه",req:0,is_admin:true},
+{name:"خانم موسوی",req:175},{name:"خانم قابل",req:175},
+{name:"خانم پیغمبری",req:175},{name:"خانم رضایی",req:175},
+{name:"خانم شاهسون",req:144},{name:"خانم غلامی",req:144},
+{name:"خانم هنرمند",req:175},{name:"خانم بابایی",req:175},
+{name:"خانم یوسفی",req:175},{name:"خانم یاقوتی",req:175},
+{name:"خانم دافعی",req:88},{name:"خانم رنجبر",req:191},
+{name:"خانم شکیب",req:191},{name:"خانم براتی",req:191},
+{name:"خانم رحمانی",req:191},{name:"خانم چراغ چشم",req:191},
+{name:"خانم امیری",req:191},{name:"خانم حشمتی",req:175},
+{name:"کاربر شیفت",req:191},{name:"کاربر مهمان",req:175}
+];
+let PERSONNEL=[],state={shifts:{},leaves:{},logs:[]},currentUser=null,isAdmin=false,BASE_DATE_UTC;
+const STORAGE_KEY="dorm_shift_data_v1";
 
-async function init(){
-  if(localStorage.getItem("darkMode")==="1")document.body.classList.add("dark-mode");
-  const{data:{session}}=await sb.auth.getSession();
-  if(session&&session.user){
-    const{data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).single();
-    if(p){currentUser=p;isAdmin=p.is_admin;await loadAll();showMain();return;}
-  }
-  await loadLoginList();showLogin();
+function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({shifts:state.shifts,leaves:state.leaves,logs:state.logs,personnel:PERSONNEL}))}catch(e){console.error(e)}}
+function loadData(){const raw=localStorage.getItem(STORAGE_KEY);if(raw){try{const d=JSON.parse(raw);state.shifts=d.shifts||{};state.leaves=d.leaves||{};state.logs=d.logs||[];PERSONNEL=d.personnel||JSON.parse(JSON.stringify(DEFAULT_PERSONNEL));return}catch(e){console.error(e)}}PERSONNEL=JSON.parse(JSON.stringify(DEFAULT_PERSONNEL));state={shifts:{},leaves:{},logs:[]};saveData()}
+function addLog(a,d){state.logs.unshift({id:Date.now()+Math.random(),action:a,details:d,by:currentUser?currentUser.name:"سیستم",at:new Date().toISOString()});if(state.logs.length>500)state.logs=state.logs.slice(0,500);saveData()}
+
+function initBaseDate(){const g=jalaali.toGregorian(1405,9,1);BASE_DATE_UTC=Date.UTC(g.gy,g.gm-1,g.gd)}
+function getDayInfo(i){const d=new Date(BASE_DATE_UTC+i*86400000),wd=d.getUTCDay(),j=jalaali.toJalaali(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()),fw=(wd+1)%7;return{weekday:["شنبه","یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه"][fw],isFriday:fw===6,isThursday:fw===5,jDay:j.jd,jMonth:MONTH}}
+function formatDateTime(iso){const d=new Date(iso),j=jalaali.toJalaali(d.getFullYear(),d.getMonth()+1,d.getDate());return`${j.jd} ${MONTH} ${j.jy} - ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+
+function closeModal(id){document.getElementById(id).classList.remove("active")}
+function dialog(o){return new Promise(res=>{const ov=document.getElementById("dialogOverlay"),t=document.getElementById("dialogTitle"),m=document.getElementById("dialogMessage"),i=document.getElementById("dialogInput"),a=document.getElementById("dialogActions");t.textContent=o.title||"";m.textContent=o.message||"";i.value=o.def||"";i.style.display=o.input?"block":"none";a.innerHTML="";const f=v=>{ov.classList.remove("active");res(v)};if(o.input){a.innerHTML=`<button class="btn-primary" id="dOk">تأیید</button><button class="btn-cancel" id="dCancel">انصراف</button>`;document.getElementById("dOk").onclick=()=>f(i.value.trim());document.getElementById("dCancel").onclick=()=>f(null)}else if(o.confirm){const c=o.warn?"btn-warn":(o.danger?"btn-danger":"btn-primary");a.innerHTML=`<button class="${c}" id="dOk">${o.okText||"تأیید"}</button><button class="btn-cancel" id="dCancel">${o.cancelText||"انصراف"}</button>`;document.getElementById("dOk").onclick=()=>f(true);document.getElementById("dCancel").onclick=()=>f(false)}else{a.innerHTML=`<button class="btn-primary" id="dOk">متوجه شدم</button>`;document.getElementById("dOk").onclick=()=>f(true)}ov.classList.add("active")})}
+const alertDlg=m=>dialog({message:m});
+const confirmDlg=(m,d)=>dialog({message:m,confirm:true,danger:d});
+const warnDlg=(m,ti)=>dialog({title:ti||"⚠️ هشدار",message:m,confirm:true,warn:true,okText:"با این حال ثبت کن",cancelText:"انصراف"});
+
+function init(){initBaseDate();loadData();const zf=document.getElementById("zoneFilter");ZONES.forEach(z=>{const o=document.createElement("option");o.value=z.name;o.textContent=z.name;zf.appendChild(o)});const s=document.getElementById("loginName");s.innerHTML='<option value="">انتخاب کنید...</option>';PERSONNEL.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name+(p.is_admin?" (مدیر)":"");s.appendChild(o)})}
+function doLogin(){const n=document.getElementById("loginName").value;if(!n){alertDlg("نام خود را انتخاب کنید");return}const p=PERSONNEL.find(x=>x.name===n);if(!p){alertDlg("کاربر یافت نشد");return}currentUser=p;isAdmin=!!p.is_admin;document.getElementById("loginScreen").style.display="none";document.getElementById("mainApp").style.display="block";document.body.classList.toggle("is-admin",isAdmin);document.getElementById("currentUserName").textContent=currentUser.name;renderAll()}
+function doLogout(){currentUser=null;isAdmin=false;document.getElementById("mainApp").style.display="none";document.getElementById("loginScreen").style.display="block"}
+function renderAll(){renderTable();renderLeaves();renderStats()}
+
+function renderTable(){
+const zs=document.getElementById("zoneFilter").value;
+const zr2=zs==="all"?ZONES:ZONES.filter(z=>z.name===zs);
+const vp=PERSONNEL.filter(p=>!p.is_admin);
+const zr=document.getElementById("zoneHeaderRow");
+Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove()});
+const sh=document.getElementById("subHeader");sh.innerHTML="";
+zr2.forEach(z=>{
+const th=document.createElement("th");th.className=z.cls;th.colSpan=z.cols.length;th.textContent=z.name;zr.appendChild(th);
+z.cols.forEach(c=>{const s=document.createElement("th");s.className=z.cls;s.textContent=c;sh.appendChild(s)})
+});
+const tb=document.getElementById("tableBody");tb.innerHTML="";
+for(let d=0;d<DAYS;d++){
+const info=getDayInfo(d),tr=document.createElement("tr");
+if(info.isFriday)tr.classList.add("is-friday");
+tr.innerHTML=`<td class="day-cell">${info.weekday}</td><td class="date-cell">${info.jDay} ${info.jMonth}</td>`;
+zr2.forEach(z=>z.cols.forEach(c=>{
+const td=document.createElement("td"),key=`${d}|${z.name}|${c}`,sel=document.createElement("select");
+sel.className="s-cell";sel.dataset.key=key;sel.dataset.day=d;sel.dataset.zone=z.name;sel.dataset.shift=c;
+const owner=state.shifts[key]||"",empty=document.createElement("option");empty.value="";empty.textContent="—";sel.appendChild(empty);
+if(isAdmin){
+vp.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o)});
+sel.value=owner;sel.addEventListener("change",()=>onShiftChange(sel))
+}else{
+if(owner&&owner!==currentUser.name){
+const t=document.createElement("option");t.value="__taken__";t.textContent=owner;sel.appendChild(t);
+sel.value="__taken__";sel.disabled=true;sel.classList.add("locked","taken")
+}else{
+const me=document.createElement("option");me.value=currentUser.name;me.textContent=currentUser.name;sel.appendChild(me);
+sel.value=owner;sel.addEventListener("change",()=>onShiftChange(sel));
+if(owner===currentUser.name)sel.classList.add("mine")
 }
-async function loadLoginList(){
-  const{data}=await sb.from("profiles").select("name,is_admin").order("name");
-  const s=document.getElementById("loginName");s.innerHTML='<option value="">انتخاب کنید...</option>';
-  (data||[]).forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name+(p.is_admin?" 👑":"");s.appendChild(o);});
-  document.getElementById("loadingScreen").style.display="none";document.getElementById("loginScreen").style.display="block";
 }
-function showLogin(){document.getElementById("mainApp").style.display="none";document.getElementById("loginScreen").style.display="block";}
-function showMain(){document.getElementById("loginScreen").style.display="none";document.getElementById("mainApp").style.display="block";document.body.classList.toggle("is-admin",isAdmin);document.getElementById("currentUserName").textContent=currentUser.name;renderAll();}
-async function doLogin(){
-  const name=document.getElementById("loginName").value,pass=document.getElementById("loginPassword").value,err=document.getElementById("loginError");
-  if(!name||!pass){err.textContent="نام و رمز را وارد کنید";return;}
-  err.textContent="";
-  let email=name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(name).replace(/%/g,'').toLowerCase()}@dorm.local`;
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent="رمز یا نام اشتباه است";return;}
-  const{data:p}=await sb.from("profiles").select("*").eq("id",data.user.id).single();
-  currentUser=p;isAdmin=p.is_admin;await loadAll();showMain();
+td.appendChild(sel);tr.appendChild(td)
+}));
+tb.appendChild(tr)
 }
-async function doLogout(){await sb.auth.signOut();currentUser=null;isAdmin=false;await loadLoginList();showLogin();}
-async function loadAll(){
-  const{data:p}=await sb.from("profiles").select("*").order("name");
-  PERSONNEL=(p||[]).map(x=>({id:x.id,name:x.name,req:x.required_hours,is_admin:x.is_admin}));
-  const{data:s}=await sb.from("shifts").select("*");
-  const{data:l}=await sb.from("leaves").select("*");
-  state.shifts={};state.leaves={};
-  (s||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per)state.shifts[`${x.day}|${x.zone}|${x.shift_type}`]=per.name;});
-  (l||[]).forEach(x=>{const per=PERSONNEL.find(z=>z.id===x.user_id);if(per){if(!state.leaves[per.name])state.leaves[per.name]={};state.leaves[per.name][String(x.day)]=true;}});
-}
-function renderAll(){renderTable();renderLeaves();renderStats();}
-  function renderTable(){
-  const zr=document.getElementById("zoneHeaderRow");Array.from(zr.children).forEach((el,i)=>{if(i>=2)el.remove();});
-  const sh=document.getElementById("subHeader");sh.innerHTML="";
-  ZONES.forEach(z=>{
-    const th=document.createElement("th");th.className=z.cls;th.colSpan=z.cols.length;th.textContent=z.name;zr.appendChild(th);
-    z.cols.forEach(c=>{const s=document.createElement("th");s.className=z.cls;s.textContent=c;sh.appendChild(s);});
-  });
-  const tb=document.getElementById("tableBody");tb.innerHTML="";
-  for(let d=0;d<DAYS;d++){
-    const info=getDayInfo(d),tr=document.createElement("tr");if(info.isFriday)tr.classList.add("is-friday");
-    tr.innerHTML=`<td class="day-cell">${info.weekday}</td><td class="date-cell">${d+1} ${MONTH}</td>`;
-    ZONES.forEach(z=>z.cols.forEach(c=>{
-      const td=document.createElement("td"),key=`${d}|${z.name}|${c}`,sel=document.createElement("select");
-      sel.className="s-cell";sel.dataset.key=key;sel.dataset.day=d;sel.dataset.zone=z.name;sel.dataset.shift=c;
-      const owner=state.shifts[key]||"";
-      const empty=document.createElement("option");empty.value="";empty.textContent="—";sel.appendChild(empty);
-      
-      if(isAdmin){
-        PERSONNEL.forEach(p=>{const o=document.createElement("option");o.value=p.name;o.textContent=p.name;sel.appendChild(o);});
-        sel.value=owner;sel.addEventListener("change",()=>onShiftChange(sel));
-      }else{
-        if(owner&&owner!==currentUser.name){
-          const taken=document.createElement("option");taken.value="__taken__";taken.textContent="🚫 گرفته‌شده";taken.disabled=true;sel.appendChild(taken);
-          sel.value="__taken__";sel.disabled=true;sel.classList.add("locked","taken");
-        }else{
-          const me=document.createElement("option");me.value=currentUser.name;me.textContent=currentUser.name;sel.appendChild(me);
-          sel.value=owner;sel.addEventListener("change",()=>onShiftChange(sel));
-          if(owner===currentUser.name)sel.classList.add("mine");
-        }
-      }
-      td.appendChild(sel);tr.appendChild(td);
-    }));
-    tb.appendChild(tr);
-  }
 }
 
-function findPersonShiftOnDay(person,dayIdx){
-  const arr=[];ZONES.forEach(z=>z.cols.forEach(s=>{if(state.shifts[`${dayIdx}|${z.name}|${s}`]===person)arr.push(s);}));return arr;
-}
-function countFridayDays(person){let c=0;for(let d=0;d<DAYS;d++){if(getDayInfo(d).isFriday&&findPersonShiftOnDay(person,d).length>0)c++;}return c;}
+function findPersonShiftOnDay(p,d){const a=[];ZONES.forEach(z=>z.cols.forEach(s=>{if(state.shifts[`${d}|${z.name}|${s}`]===p)a.push(s)}));return a}
+function countFridayDays(p){let c=0;for(let d=0;d<DAYS;d++)if(getDayInfo(d).isFriday&&findPersonShiftOnDay(p,d).length>0)c++;return c}
 
 async function onShiftChange(sel){
-  const key=sel.dataset.key,val=sel.value,d=+sel.dataset.day,zone=sel.dataset.zone,shiftType=sel.dataset.shift;
-  const prevOwner=state.shifts[key]||"";
-  
-  if(!isAdmin&&val&&val!==currentUser.name){sel.value=prevOwner;return;}
-  
-  if(!val){
-    if(prevOwner){const p=PERSONNEL.find(x=>x.name===prevOwner);if(p)await sb.from("shifts").delete().eq("day",d).eq("zone",zone).eq("shift_type",shiftType).eq("user_id",p.id);delete state.shifts[key];renderAll();}
-    return;
-  }
-
-  const targetPerson=PERSONNEL.find(x=>x.name===val);
-  if(!targetPerson){sel.value=prevOwner;return;}
-
-  const todayShifts=findPersonShiftOnDay(val,d);
-  const simulatedToday=[...todayShifts,shiftType];
-  const uniqToday=[...new Set(simulatedToday)];
-  const prevShifts=d>0?findPersonShiftOnDay(val,d-1):[];
-  const nextShifts=d<DAYS-1?findPersonShiftOnDay(val,d+1):[];
-  let issues=[];
-
-  if(uniqToday.includes("صبح")&&uniqToday.includes("شب"))issues.push("ترکیب صبح و شب مجاز نیست.");
-  if(simulatedToday.length>2)issues.push("بیش از دو شیفت مجاز نیست.");
-  if(simulatedToday.length!==uniqToday.length)issues.push("تکرار یک نوع شیفت مجاز نیست.");
-  if(simulatedToday.length===2){
-    const ok=(uniqToday.includes("صبح")&&uniqToday.includes("عصر")&&!uniqToday.includes("شب"))||(uniqToday.includes("عصر")&&uniqToday.includes("شب")&&!uniqToday.includes("صبح"));
-    if(!ok)issues.push("ترکیب مجاز نیست؛ تنها صبح+عصر یا عصر+شب.");
-  }
-  if(uniqToday.includes("شب")&&prevShifts.includes("شب"))issues.push("دو شیفت شب متوالی مجاز نیست.");
-  if(uniqToday.includes("شب")&&nextShifts.includes("شب"))issues.push("دو شیفت شب متوالی مجاز نیست.");
-  if(uniqToday.includes("شب")&&nextShifts.length>0)issues.push("بعد از شیفت شب، فردا نمی‌توانید شیفت بزنید.");
-  if(prevShifts.includes("شب")&&simulatedToday.length>0)issues.push("دیشب شیفت شب داشته‌اید؛ امروز نمی‌توانید شیفت ثبت کنید.");
-
-  if(getDayInfo(d).isFriday){
-    const hadThisFriday=todayShifts.length>0;
-    if(!hadThisFriday&&countFridayDays(val)>=2)issues.push("شما قبلاً در ۲ جمعه شیفت داشته‌اید.");
-  }
-
-  const personLeaves=state.leaves[val]||{};
-  if(Object.prototype.hasOwnProperty.call(personLeaves,String(d)))issues.push("در این روز مرخصی ثبت شده است.");
-
-  if(issues.length>0){
-    await alertDlg("⛔ قوانین:\n• "+issues.join("\n• "));
-    sel.value=prevOwner;return;
-  }
-
-  try{
-    if(prevOwner){
-      const oldP=PERSONNEL.find(x=>x.name===prevOwner);
-      if(oldP)await sb.from("shifts").delete().eq("day",d).eq("zone",zone).eq("shift_type",shiftType);
-    }
-    const{error}=await sb.from("shifts").insert({day:d,zone:zone,shift_type:shiftType,user_id:targetPerson.id});
-    if(error){
-      if(error.code==="23505")await alertDlg("⛔ این شیفت هم‌اکنون توسط همکار دیگری گرفته شد.");
-      else await alertDlg("⛔ خطا: "+error.message);
-      sel.value=prevOwner;return;
-    }
-    state.shifts[key]=val;renderAll();showAlert("✅ شیفت ثبت شد.");
-  }catch(e){await alertDlg("⛔ خطا: "+e.message);sel.value=prevOwner;}
+const key=sel.dataset.key,val=sel.value,d=+sel.dataset.day,zone=sel.dataset.zone,st=sel.dataset.shift;
+const prev=state.shifts[key]||"";
+if(!isAdmin&&val&&val!==currentUser.name){alertDlg("فقط شیفت خودتان را تغییر دهید.");sel.value=prev;return}
+if(!val){
+if(prev){delete state.shifts[key];saveData();addLog("حذف شیفت",{zone,type:st,day:d,target:prev});renderAll();alertDlg("شیفت حذف شد.")}
+return
+}
+const tp=PERSONNEL.find(x=>x.name===val);if(!tp){sel.value=prev;return}
+const ts=findPersonShiftOnDay(val,d),sim=[...ts,st],uniq=[...new Set(sim)];
+const ps=d>0?findPersonShiftOnDay(val,d-1):[],ns=d<DAYS-1?findPersonShiftOnDay(val,d+1):[];
+let iss=[];
+if(uniq.includes("صبح")&&uniq.includes("شب"))iss.push("ترکیب صبح و شب مجاز نیست.");
+if(sim.length>2)iss.push("بیش از دو شیفت مجاز نیست.");
+if(sim.length!==uniq.length)iss.push("تکرار شیفت مجاز نیست.");
+if(sim.length===2){const ok=(uniq.includes("صبح")&&uniq.includes("عصر")&&!uniq.includes("شب"))||(uniq.includes("عصر")&&uniq.includes("شب")&&!uniq.includes("صبح"));if(!ok)iss.push("ترکیب مجاز نیست.")}
+if(uniq.includes("شب")&&ps.includes("شب"))iss.push("شب متوالی مجاز نیست.");
+if(uniq.includes("شب")&&ns.includes("شب"))iss.push("شب متوالی مجاز نیست.");
+if(uniq.includes("شب")&&ns.length>0)iss.push("بعد از شب نمی‌توانید شیفت بزنید.");
+if(ps.includes("شب")&&sim.length>0)iss.push("دیشب شب داشتید.");
+const pl=state.leaves[val]||{};if(Object.prototype.hasOwnProperty.call(pl,String(d)))iss.push("در این روز مرخصی دارید.");
+if(iss.length>0){alertDlg("قوانین:\n• "+iss.join("\n• "));sel.value=prev;return}
+const di=getDayInfo(d);
+if(di.isFriday&&ts.length===0){
+const fc=countFridayDays(val);
+if(fc>=2){
+const ok=await warnDlg(`${val} در حال حاضر ${fc} جمعه کامل دارد.\nقانون: حداکثر ۲ جمعه کامل.\n\nآیا با این حال می‌خواهید این شیفت جمعه را ثبت کنید؟`,"⚠️ محدودیت دو جمعه");
+if(!ok){sel.value=prev;return}
+}
+}
+if(prev)delete state.shifts[key];
+state.shifts[key]=val;saveData();
+sel.classList.toggle("mine",!isAdmin&&val===currentUser.name);
+addLog("ثبت شیفت",{zone,type:st,day:d,target:val});
+alertDlg("شیفت ثبت شد.");renderStats()
 }
 
 function renderLeaves(){
-  const tb=document.getElementById("leaveTableBody");tb.innerHTML="";
-  const list=isAdmin?PERSONNEL:PERSONNEL.filter(p=>p.name===currentUser.name);
-  if(list.length===0){tb.innerHTML="<tr><td colspan='6' style='text-align:center;'>ردیفی نیست</td></tr>";return;}
-
-  list.forEach(p=>{
-    const tr=document.createElement("tr"),tdN=document.createElement("td");
-    tdN.className="leave-name-cell";tdN.textContent=p.name;tr.appendChild(tdN);
-    const pl=state.leaves[p.name]||{},days=Object.keys(pl).map(Number).sort((a,b)=>a-b);
-    const canEdit=isAdmin||p.name===currentUser.name;
-    for(let i=0;i<5;i++){
-      const td=document.createElement("td"),sel=document.createElement("select");
-      sel.className="leave-select";if(!canEdit){sel.disabled=true;sel.classList.add("locked");}
-      const empty=document.createElement("option");empty.value="";empty.textContent="—";sel.appendChild(empty);
-      for(let d=1;d<=DAYS;d++){if(getDayInfo(d-1).isFriday)continue;const o=document.createElement("option");o.value=d-1;o.textContent=d+" "+MONTH;sel.appendChild(o);}
-      if(days[i]!==undefined)sel.value=days[i];
-      sel.addEventListener("change",()=>onLeaveChange(p.name,sel,td));
-      td.appendChild(sel);tr.appendChild(td);
-    }
-    tb.appendChild(tr);
-  });
+const tb=document.getElementById("leaveTableBody");tb.innerHTML="";
+const list=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+if(list.length===0){tb.innerHTML="<tr><td colspan='6'>ردیفی نیست</td></tr>";return}
+list.forEach(p=>{
+const tr=document.createElement("tr"),tdN=document.createElement("td");
+tdN.className="leave-name-cell";tdN.textContent=p.name;tr.appendChild(tdN);
+const pl=state.leaves[p.name]||{},days=Object.keys(pl).map(Number).sort((a,b)=>a-b);
+const ce=isAdmin||p.name===currentUser.name;
+for(let i=0;i<5;i++){
+const td=document.createElement("td"),sel=document.createElement("select");
+sel.className="leave-select";
+if(!ce){sel.disabled=true;sel.classList.add("locked")}
+const empty=document.createElement("option");empty.value="";empty.textContent="—";sel.appendChild(empty);
+for(let d=0;d<DAYS;d++){
+const info=getDayInfo(d);if(info.isFriday)continue;
+const o=document.createElement("option");o.value=d;o.textContent=`${info.weekday} ${info.jDay} ${info.jMonth}`;sel.appendChild(o)
+}
+if(days[i]!==undefined)sel.value=days[i];
+sel.addEventListener("change",()=>onLeaveChange(p.name,sel,td));
+td.appendChild(sel);tr.appendChild(td)
+}
+tb.appendChild(tr)
+})
 }
 
-async function onLeaveChange(person,sel,td){
-  if(!isAdmin&&person!==currentUser.name){sel.value="";return;}
-  const newDayVal=sel.value,rowSelects=[];
-  for(let k=1;k<=5;k++){const s=td.parentElement.children[k]?.querySelector("select");if(s)rowSelects.push(s);}
-  const newLeaves={};let dup=false;
-  rowSelects.forEach(s=>{if(!s.value)return;if(newLeaves[s.value])dup=true;else newLeaves[s.value]=true;});
-  if(dup){await alertDlg("⛔ تاریخ تکراری");sel.value="";return;}
-  
-  const pObj=PERSONNEL.find(x=>x.name===person);if(!pObj)return;
-
-  if(!newDayVal){
-    const old=state.leaves[person]||{};
-    for(const day of Object.keys(old)){
-      if(!newLeaves[day]){await sb.from("leaves").delete().eq("day",parseInt(day)).eq("user_id",pObj.id);delete old[day];}
-    }
-    if(Object.keys(old).length===0)delete state.leaves[person];else state.leaves[person]=old;
-    renderStats();return;
-  }
-
-  const dayIdx=parseInt(newDayVal);
-  if(getDayInfo(dayIdx).isFriday){await alertDlg("⛔ جمعه مجاز نیست.");sel.value="";return;}
-  if(findPersonShiftOnDay(person,dayIdx).length>0){await alertDlg("⛔ در این روز شیفت دارید.");sel.value="";return;}
-
-  let capacity=0;Object.keys(state.leaves).forEach(o=>{if(o===person)return;if(Object.prototype.hasOwnProperty.call(state.leaves[o],String(dayIdx)))capacity++;});
-  if(capacity>=2){await alertDlg("⛔ ظرفیت این روز پر است.");sel.value="";return;}
-
-  try{
-    const{error}=await sb.from("leaves").insert({day:dayIdx,user_id:pObj.id});
-    if(error){
-      if(error.message.includes("LEAVE_CAPACITY_FULL"))await alertDlg("⛔ ظرفیت پر شد (همزمان).");
-      else if(error.code==="23505")await alertDlg("⛔ قبلاً ثبت شده.");
-      else await alertDlg("⛔ خطا: "+error.message);
-      sel.value="";return;
-    }
-    if(!state.leaves[person])state.leaves[person]={};
-    state.leaves[person][String(dayIdx)]=true;
-    renderStats();showAlert("✅ مرخصی ثبت شد.");
-  }catch(e){await alertDlg("⛔ خطا: "+e.message);sel.value="";}
+function onLeaveChange(person,sel,td){
+if(!isAdmin&&person!==currentUser.name){sel.value="";return}
+const nv=sel.value,rs=[];
+for(let k=1;k<=5;k++){const s=td.parentElement.children[k]?.querySelector("select");if(s)rs.push(s)}
+const nl={};let dup=false;
+rs.forEach(s=>{if(!s.value)return;if(nl[s.value])dup=true;else nl[s.value]=true});
+if(dup){alertDlg("تاریخ تکراری");sel.value="";return}
+const pObj=PERSONNEL.find(x=>x.name===person);if(!pObj)return;
+if(!nv){
+const old=state.leaves[person]||{};
+for(const day of Object.keys(old))if(!nl[day])delete old[day];
+if(Object.keys(old).length===0)delete state.leaves[person];else state.leaves[person]=old;
+saveData();renderStats();return
+}
+const di=parseInt(nv);
+if(getDayInfo(di).isFriday){alertDlg("جمعه مجاز نیست.");sel.value="";return}
+if(findPersonShiftOnDay(person,di).length>0){alertDlg("در این روز شیفت دارید.");sel.value="";return}
+let cnt=0;
+Object.keys(state.leaves).forEach(n=>{if(Object.prototype.hasOwnProperty.call(state.leaves[n],String(di)))cnt++});
+if(cnt>=2){alertDlg("ظرفیت پر است.");sel.value="";return}
+if(!state.leaves[person])state.leaves[person]={};
+state.leaves[person][String(di)]=true;
+saveData();addLog("ثبت مرخصی",{target:person,day:di});
+renderStats();alertDlg("مرخصی ثبت شد.")
 }
 
-function calcShiftHours(type,dayIdx,req){
-  const base=HOURS[type],is184=req===184,info=getDayInfo(dayIdx),nxt=getDayInfo(dayIdx+1);
-  if(type==="صبح"||type==="عصر"){if(info.isFriday)return{total:base*1.5,holiday:base*0.5};return{total:base,holiday:0};}
-  let h=0;if(is184){if(nxt.isFriday)h=7.5;else if(info.isFriday)h=4.5;}else{if(info.isFriday)h=12;}
-  return{total:base+h*0.5,holiday:h*0.5};
+function calcStats(){
+const stats={};
+PERSONNEL.forEach(p=>{stats[p.name]={m:0,e:0,n:0,h:0,leave:0}});
+Object.keys(state.leaves).forEach(n=>{
+const p=PERSONNEL.find(x=>x.name===n);
+if(p&&stats[p.name])stats[p.name].leave=Object.keys(state.leaves[n]).length*LEAVE_HOURS
+});
+for(let d=0;d<DAYS;d++){
+const info=getDayInfo(d);
+ZONES.forEach(z=>z.cols.forEach(t=>{
+const n=state.shifts[`${d}|${z.name}|${t}`];if(!n)return;
+const p=PERSONNEL.find(x=>x.name===n);if(!p)return;
+const s=stats[p.name];if(!s)return;
+const base=HOURS[t],is191=p.req===191;
+if(t==="صبح"||t==="عصر"){
+if(info.isFriday){s[t==="صبح"?"m":"e"]+=base*1.5;s.h+=base*0.5}
+else s[t==="صبح"?"m":"e"]+=base
+}else if(t==="شب"){
+if(info.isThursday){
+if(is191){s.n+=4.5+7.5*1.5;s.h+=7.5*0.5}else s.n+=base
+}else if(info.isFriday){
+if(is191){s.n+=4.5*1.5+7.5;s.h+=4.5*0.5}else{s.n+=base*1.5;s.h+=base*0.5}
+}else s.n+=base
+}
+}))
+}
+return stats
 }
 
 function renderStats(){
-  const tb=document.getElementById("statsBody");tb.innerHTML="";
-  const list=isAdmin?PERSONNEL:PERSONNEL.filter(p=>p.name===currentUser.name);
-  if(list.length===0){tb.innerHTML="<tr><td colspan='10' style='text-align:center;'>ردیفی نیست</td></tr>";return;}
-  const m={},e={},n={},h={},lc={};
-  PERSONNEL.forEach(p=>{m[p.name]=0;e[p.name]=0;n[p.name]=0;h[p.name]=0;lc[p.name]=0;});
-  Object.keys(state.leaves).forEach(per=>{if(lc[per]!==undefined)lc[per]=Object.keys(state.leaves[per]).length;});
-  for(let d=0;d<DAYS;d++){
-    ZONES.forEach(z=>z.cols.forEach(t=>{
-      const person=state.shifts[`${d}|${z.name}|${t}`];if(!person)return;
-      const p=PERSONNEL.find(x=>x.name===person);if(!p)return;
-      const{holiday}=calcShiftHours(t,d,p.req);h[person]+=holiday;
-      if(t==="صبح")m[person]+=HOURS[t];else if(t==="عصر")e[person]+=HOURS[t];else n[person]+=HOURS[t];
-    }));
-  }
-  list.forEach(p=>{
-    const ts=m[p.name]+e[p.name]+n[p.name]+h[p.name],lh=Math.round(lc[p.name]*LEAVE_HOURS*100)/100,total=Math.round((ts+lh)*10)/10,diff=Math.round((total-p.req)*10)/10;
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="stat-name">${p.name}</td><td>${p.req}</td><td>${m[p.name]}</td><td>${e[p.name]}</td><td>${n[p.name]}</td><td>${Math.round(h[p.name]*10)/10}</td><td>${lh}</td><td style="font-weight:bold;">${total}</td><td class="${diff>0?'val-plus':''}">${diff>0?diff:0}</td><td class="${diff<0?'val-minus':''}">${diff<0?Math.abs(diff):0}</td>`;
-    tb.appendChild(tr);
-  });
+const tb=document.getElementById("statsBody");tb.innerHTML="";
+const list=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+if(list.length===0){tb.innerHTML="<tr><td colspan='10'>ردیفی نیست</td></tr>";return}
+const stats=calcStats();
+list.forEach(p=>{
+const s=stats[p.name];
+const tw=s.m+s.e+s.n,gt=tw+s.leave,diff=gt-p.req;
+const tr=document.createElement("tr");
+tr.innerHTML=`<td class="stat-name">${p.name}</td><td style="font-weight:900;color:var(--primary)">${p.req}</td><td>${Math.round(s.m*10)/10}</td><td>${Math.round(s.e*10)/10}</td><td>${Math.round(s.n*10)/10}</td><td>${Math.round(s.h*10)/10}</td><td>${Math.round(s.leave*100)/100}</td><td style="font-weight:800">${Math.round(gt*10)/10}</td><td class="${diff>0?'val-plus':''}">${diff>0?Math.round(diff*10)/10:0}</td><td class="${diff<0?'val-minus':''}">${diff<0?Math.abs(Math.round(diff*10)/10):0}</td>`;
+tb.appendChild(tr)
+})
 }
 
-function renderStaffList(){
-  const l=document.getElementById("staffList");l.innerHTML="";
-  PERSONNEL.forEach((p,i)=>{
-    const d=document.createElement("div");d.className="staff-item";
-    d.innerHTML=`<span class="staff-info">${p.name}${p.is_admin?' 👑':''}</span>
-    <input type="number" class="req-input" value="${p.req}" data-idx="${i}" ${p.is_admin?'disabled':''}>
-    ${!p.is_admin?`<button class="btn-del" data-del="${i}">حذف</button>`:''}`;
-    l.appendChild(d);
-  });
-  l.querySelectorAll("input.req-input").forEach(inp=>inp.addEventListener("change",async()=>{
-    const idx=+inp.dataset.idx,v=parseFloat(inp.value);if(isNaN(v)||v<0){inp.value=PERSONNEL[idx].req;return;}
-    await sb.from("profiles").update({required_hours:v}).eq("id",PERSONNEL[idx].id);PERSONNEL[idx].req=v;renderAll();
-  }));
-  l.querySelectorAll("button.btn-del").forEach(b=>b.addEventListener("click",async()=>{
-    const p=PERSONNEL[+b.dataset.del];
-    if(!await confirmDlg(`حذف ${p.name}؟`,"حذف",true))return;
-    await sb.from("profiles").delete().eq("id",p.id);await loadAll();renderStaffList();renderAll();
-  }));
+function switchTab(n,btn){
+document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById('panel-'+n).classList.add('active');
+btn.classList.add('active');
+document.getElementById("zoneFilterBox").classList.toggle("active",n==='shifts')
 }
 
-async function addStaff(){
-  const name=document.getElementById("newStaffName").value.trim(),req=parseFloat(document.getElementById("newStaffReq").value);
-  if(!name||isNaN(req))return alertDlg("نام و موظفی معتبر نیست.");
-  await alertDlg("⚠️ برای افزودن پرسنل جدید، با ادمین اصلی (شما) از طریق پنل سوپابیس تماس بگیرید.\nدلیل: افزودن کاربر جدید نیاز به دسترسی ادمین دارد.\n\nلطفاً کاربر جدید را در بخش Authentication > Users بسازید و سپس پروفایل او را در جدول profiles وارد کنید.");
+function openStaff(){
+if(!isAdmin)return alertDlg("دسترسی غیرمجاز.");
+const l=document.getElementById("staffList");l.innerHTML="";
+PERSONNEL.filter(p=>!p.is_admin).forEach(p=>{
+const idx=PERSONNEL.indexOf(p),d=document.createElement("div");d.className="staff-item";
+d.innerHTML=`<span style="font-weight:700">${p.name}</span><div style="display:flex;gap:8px;align-items:center"><input type="number" class="req-input" value="${p.req}" data-idx="${idx}"><button class="btn-del" data-del="${idx}">حذف</button></div>`;
+l.appendChild(d)
+});
+l.querySelectorAll("input.req-input").forEach(inp=>inp.addEventListener("change",()=>{
+const idx=+inp.dataset.idx,v=parseFloat(inp.value);
+if(isNaN(v)||v<0){inp.value=PERSONNEL[idx].req;return}
+const old=PERSONNEL[idx].req;PERSONNEL[idx].req=v;saveData();
+addLog("تغییر ساعت موظفی",{target:PERSONNEL[idx].name,old,new:v});
+renderAll()
+}));
+l.querySelectorAll("button.btn-del").forEach(b=>b.addEventListener("click",async()=>{
+const p=PERSONNEL[+b.dataset.del];
+if(!await confirmDlg(`حذف ${p.name}؟`,true))return;
+PERSONNEL.splice(+b.dataset.del,1);saveData();
+addLog("حذف پرسنل",{target:p.name});
+openStaff();renderAll()
+}));
+document.getElementById("staffModal").classList.add("active")
 }
 
-async function loadLogs(){
-  const{data}=await sb.from("audit_logs").select("*,profiles(name)").order("created_at",{ascending:false}).limit(50);
-  const b=document.getElementById("logsBody");
-  if(!data||data.length===0){b.innerHTML="<p style='text-align:center;color:#64748b;'>گزارشی ثبت نشده است.</p>";return;}
-  b.innerHTML=data.map(l=>`<div style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;">👤 <b>${l.profiles?.name||'ناشناس'}</b> - ${l.action} (${new Date(l.created_at).toLocaleString('fa-IR')})</div>`).join('');
+function openLogs(){
+if(!isAdmin)return alertDlg("دسترسی غیرمجاز.");
+const b=document.getElementById("logsBody");
+if(state.logs.length===0){b.innerHTML="<p style='text-align:center;padding:30px'>گزارشی یافت نشد.</p>"}
+else{
+b.innerHTML="<div>"+state.logs.slice(0,100).map(l=>{
+const date=formatDateTime(l.at);
+return`<div class="log-item"><div class="log-title">${l.action} <span class="log-by">توسط ${l.by}</span></div><div class="log-details">${JSON.stringify(l.details)}</div><div class="log-date">${date}</div></div>`
+}).join('')+"</div>"
+}
+document.getElementById("logsModal").classList.add("active")
 }
 
-async function doRecovery(){
-  const name=document.getElementById("loginName").value,code=document.getElementById("recoveryCode").value,newPw=document.getElementById("recoveryNewPassword").value,err=document.getElementById("recoveryError");
-  if(!name){err.textContent="ابتدا نام خود را انتخاب کنید.";return;}
-  if(code!=="654321"){err.textContent="کد بازیابی اشتباه است.";return;}
-  if(!newPw||newPw.length<6){err.textContent="رمز باید حداقل ۶ کاراکتر باشد.";return;}
-  err.textContent="در حال پردازش...";
-  try{
-    const email=name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(name).replace(/%/g,'').toLowerCase()}@dorm.local`;
-    const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
-    if(error)throw error;
-    closeModal("recoveryModal");await alertDlg("✅ لینک بازیابی به ایمیل شما ارسال شد.");
-  }catch(e){err.textContent="خطا: "+e.message;}
+function strToU8(str){return new TextEncoder().encode(str)}
+function createZip(files){
+const enc=new TextEncoder();let offset=0;const centralDir=[];
+const crcTable=(function(){const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0}return t})();
+function crc32(data){let crc=0xFFFFFFFF;for(let i=0;i<data.length;i++)crc=(crc>>>8)^crcTable[(crc^data[i])&0xFF];return(crc^0xFFFFFFFF)>>>0}
+const parts=[];
+for(const f of files){
+const nameBytes=enc.encode(f.name);
+const dataBytes=typeof f.data==="string"?enc.encode(f.data):f.data;
+const crc=crc32(dataBytes);const size=dataBytes.length;
+const localHeader=new Uint8Array(30+nameBytes.length);
+const dv=new DataView(localHeader.buffer);
+dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint16(6,0x0800,true);dv.setUint16(8,0,true);dv.setUint16(10,0,true);dv.setUint16(12,0,true);dv.setUint32(14,crc,true);dv.setUint32(18,size,true);dv.setUint32(22,size,true);dv.setUint16(26,nameBytes.length,true);dv.setUint16(28,0,true);
+localHeader.set(nameBytes,30);
+parts.push(localHeader);parts.push(dataBytes);
+const cd=new Uint8Array(46+nameBytes.length);const cdv=new DataView(cd.buffer);
+cdv.setUint32(0,0x02014b50,true);cdv.setUint16(4,20,true);cdv.setUint16(6,20,true);cdv.setUint16(8,0x0800,true);cdv.setUint16(10,0,true);cdv.setUint16(12,0,true);cdv.setUint16(14,0,true);cdv.setUint32(16,crc,true);cdv.setUint32(20,size,true);cdv.setUint32(24,size,true);cdv.setUint16(28,nameBytes.length,true);cdv.setUint16(30,0,true);cdv.setUint16(32,0,true);cdv.setUint16(34,0,true);cdv.setUint16(36,0,true);cdv.setUint32(38,0,true);cdv.setUint32(42,offset,true);
+cd.set(nameBytes,46);centralDir.push(cd);
+offset+=localHeader.length+dataBytes.length;
 }
-
-async function openChangePassword(){
-  const oldPw=await promptDlg("رمز فعلی:","");
-  if(!oldPw)return;
-  const newPw=await promptDlg("رمز جدید (حداقل ۶ کاراکتر):","");
-  if(!newPw||newPw.length<6)return alertDlg("رمز کوتاه است.");
-  const email=currentUser.name==="مدیر سامانه"?"admin@dorm.local":`${encodeURIComponent(currentUser.name).replace(/%/g,'').toLowerCase()}@dorm.local`;
-  const{error:err1}=await sb.auth.signInWithPassword({email,password:oldPw});
-  if(err1)return alertDlg("رمز فعلی اشتباه است.");
-  const{error:err2}=await sb.auth.updateUser({password:newPw});
-  if(err2)return alertDlg("خطا: "+err2.message);
-  alertDlg("✅ رمز تغییر کرد.");
+let cdSize=0;for(const c of centralDir)cdSize+=c.length;
+const endCd=new Uint8Array(22);const edv=new DataView(endCd.buffer);
+edv.setUint32(0,0x06054b50,true);edv.setUint16(8,files.length,true);edv.setUint16(10,files.length,true);edv.setUint32(12,cdSize,true);edv.setUint32(16,offset,true);
+const total=offset+cdSize+22;const out=new Uint8Array(total);
+let pos=0;for(const p of parts){out.set(p,pos);pos+=p.length}
+for(const c of centralDir){out.set(c,pos);pos+=c.length}
+out.set(endCd,pos);return out
 }
-
-function switchTab(n){
-  ["shifts","leaves","stats"].forEach(t=>{document.getElementById("tabBtn"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");document.getElementById("panel"+t.charAt(0).toUpperCase()+t.slice(1))?.classList.remove("active");});
-  document.getElementById("tabBtn"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
-  document.getElementById("panel"+n.charAt(0).toUpperCase()+n.slice(1))?.classList.add("active");
+function escXml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function colLetter(n){let s="";while(n>=0){s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)-1}return s}
+function buildSheetXml(rows){
+let xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">\n<sheetViews><sheetView rightToLeft="1" tabSelected="1" workbookViewId="0"/></sheetViews>\n<sheetFormatPr defaultRowHeight="20"/>\n<cols>';
+if(rows.cols)rows.cols.forEach((w,i)=>{xml+=`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`});
+xml+='</cols>\n<sheetData>\n';
+rows.data.forEach((row,ri)=>{
+xml+=`<row r="${ri+1}"${row.height?` ht="${row.height}" customHeight="1"`:''}>`;
+row.cells.forEach((cell,ci)=>{
+if(cell===null||cell===undefined)return;
+const ref=colLetter(ci)+(ri+1);
+const v=cell.v!==undefined?cell.v:cell;
+const s=cell.s!==undefined?cell.s:0;
+if(typeof v==="number")xml+=`<c r="${ref}" s="${s}" t="n"><v>${v}</v></c>`;
+else xml+=`<c r="${ref}" s="${s}" t="inlineStr"><is><t>${escXml(v)}</t></is></c>`
+});
+xml+='</row>\n'
+});
+xml+='</sheetData>\n</worksheet>';return xml
 }
-
+function exportXLSX(){
+const zs=document.getElementById("zoneFilter").value;
+const ze=zs==="all"?ZONES:ZONES.filter(z=>z.name===zs);
+const stylesXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts count="6">
+<font><sz val="11"/><name val="Tahoma"/><color rgb="FF1E293B"/></font>
+<font><b/><sz val="12"/><name val="Tahoma"/><color rgb="FFFFFFFF"/></font>
+<font><b/><sz val="11"/><name val="Tahoma"/><color rgb="FF1E293B"/></font>
+<font><sz val="10"/><name val="Tahoma"/><color rgb="FF64748B"/></font>
+<font><b/><sz val="11"/><name val="Tahoma"/><color rgb="FF059669"/></font>
+<font><b/><sz val="11"/><name val="Tahoma"/><color rgb="FFDC2626"/></font>
+</fonts>
+<fills count="9">
+<fill><patternFill patternType="none"/></fill>
+<fill><patternFill patternType="gray125"/></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF0F172A"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF0369A1"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF15803D"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFC2410C"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFA16207"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF6B21A8"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFFFF7ED"/><bgColor indexed="64"/></patternFill></fill>
+</fills>
+<borders count="2">
+<border><left/><right/><top/><bottom/><diagonal/></border>
+<border><left style="thin"><color rgb="FFCBD5E1"/></left><right style="thin"><color rgb="FFCBD5E1"/></right><top style="thin"><color rgb="FFCBD5E1"/></top><bottom style="thin"><color rgb="FFCBD5E1"/></bottom><diagonal/></border>
+</borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="14">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="1" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="4" fillId="8" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="5" fillId="8" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" readingOrder="2"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+const s1rows={cols:[12,14],data:[]};
+const hdrRow1={height:30,cells:[{v:"روز",s:1},{v:"تاریخ",s:1}]};
+const hdrRow2={height:28,cells:[{v:"",s:1},{v:"",s:1}]};
+ze.forEach((z,zi)=>z.cols.forEach(c=>{hdrRow1.cells.push({v:z.name,s:5+zi});hdrRow2.cells.push({v:c,s:5+zi})}));
+s1rows.data.push(hdrRow1);s1rows.data.push(hdrRow2);
+for(let d=0;d<DAYS;d++){
+const info=getDayInfo(d);
+const row={height:22,cells:[{v:info.weekday,s:3},{v:`${info.jDay} ${info.jMonth}`,s:4}]};
+ze.forEach(zone=>zone.cols.forEach(st=>{row.cells.push({v:state.shifts[`${d}|${zone.name}|${st}`]||"—",s:0})}));
+s1rows.data.push(row)
+}
+ze.forEach((z,zi)=>{for(let i=0;i<z.cols.length;i++)s1rows.cols.push(16)});
+const s2rows={cols:[22,10,10,10,10,12,10,12,10,10],data:[]};
+s2rows.data.push({height:30,cells:[{v:"نام",s:1},{v:"موظفی",s:1},{v:"صبح",s:1},{v:"عصر",s:1},{v:"شب",s:1},{v:"تعطیلات",s:1},{v:"مرخصی",s:1},{v:"کارکرد کل",s:1},{v:"اضافه",s:1},{v:"کسری",s:1}]});
+const stats=calcStats();
+const sl=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+sl.forEach(p=>{
+const s=stats[p.name];
+const tw=s.m+s.e+s.n,gt=tw+s.leave,diff=gt-p.req;
+s2rows.data.push({height:22,cells:[{v:p.name,s:12},{v:p.req,s:13},{v:Math.round(s.m*10)/10,s:13},{v:Math.round(s.e*10)/10,s:13},{v:Math.round(s.n*10)/10,s:13},{v:Math.round(s.h*10)/10,s:13},{v:Math.round(s.leave*100)/100,s:13},{v:Math.round(gt*10)/10,s:3},{v:diff>0?Math.round(diff*10)/10:0,s:diff>0?10:13},{v:diff<0?Math.abs(Math.round(diff*10)/10):0,s:diff<0?11:13}]})
+});
+const s3rows={cols:[22,18,18,18,18,18,10],data:[]};
+s3rows.data.push({height:30,cells:[{v:"نام",s:1},{v:"مرخصی ۱",s:1},{v:"مرخصی ۲",s:1},{v:"مرخصی ۳",s:1},{v:"مرخصی ۴",s:1},{v:"مرخصی ۵",s:1},{v:"تعداد",s:1}]});
+const ll=isAdmin?PERSONNEL.filter(p=>!p.is_admin):PERSONNEL.filter(p=>p.name===currentUser.name);
+ll.forEach(p=>{
+const lv=state.leaves[p.name]||{},days=Object.keys(lv).map(Number).sort((a,b)=>a-b);
+const row={height:22,cells:[{v:p.name,s:12}]};
+for(let i=0;i<5;i++){
+if(days[i]!==undefined){const info=getDayInfo(days[i]);row.cells.push({v:`${info.weekday} ${info.jDay} ${info.jMonth}`,s:13})}
+else row.cells.push({v:"—",s:13})
+}
+row.cells.push({v:days.length,s:13});
+s3rows.data.push(row)
+});
+const sheet1=buildSheetXml(s1rows);const sheet2=buildSheetXml(s2rows);const sheet3=buildSheetXml(s3rows);
+const workbookXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<bookViews><workbookView rightToLeft="1"/></bookViews>
+<sheets>
+<sheet name="برنامه شیفت‌ها" sheetId="1" r:id="rId1"/>
+<sheet name="آمار کارکرد" sheetId="2" r:id="rId2"/>
+<sheet name="مرخصی‌ها" sheetId="3" r:id="rId3"/>
+</sheets>
+</workbook>`;
+const workbookRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/>
+<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+const rootRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+const files=[
+{name:"[Content_Types].xml",data:contentTypes},
+{name:"_rels/.rels",data:rootRels},
+{name:"xl/workbook.xml",data:workbookXml},
+{name:"xl/_rels/workbook.xml.rels",data:workbookRels},
+{name:"xl/styles.xml",data:stylesXml},
+{name:"xl/worksheets/sheet1.xml",data:sheet1},
+{name:"xl/worksheets/sheet2.xml",data:sheet2},
+{name:"xl/worksheets/sheet3.xml",data:sheet3}
+];
+const zipData=createZip(files);
+const blob=new Blob([zipData],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download=zs==="all"?`گزارش-شیفت-${MONTH}-۱۴۰۵.xlsx`:`گزارش-شیفت-${zs}-${MONTH}-۱۴۰۵.xlsx`;
+a.click();URL.revokeObjectURL(a.href);
+setTimeout(()=>{alertDlg("✅ فایل اکسل با فرمت XLSX دانلود شد.\n\n🎨 راست‌چین + رنگ‌بندی حرفه‌ای\n📊 ۳ شیت: برنامه شیفت‌ها، آمار، مرخصی‌ها")},300)
+}
 window.addEventListener("load",init);
 </script>
 </body>
